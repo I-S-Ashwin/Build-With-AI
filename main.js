@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.VoiceService.onRecordingStateChange = (isRec) => {
       if (isRec) {
         btnMic.classList.add('recording');
-        if (micStatusText) micStatusText.textContent = 'Listening... Speak your symptoms clearly';
+        if (micStatusText) micStatusText.textContent = 'Listening... Speak symptoms (Tap red mic again when done)';
         if (liveVoicePreview) liveVoicePreview.style.display = 'flex';
       } else {
         btnMic.classList.remove('recording');

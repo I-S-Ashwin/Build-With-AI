@@ -4,6 +4,7 @@ const VoiceService = {
   recognition: null,
   isRecording: false,
   transcript: '',
+  finalTranscript: '',
   onTranscriptChange: null,
   onRecordingStateChange: null,
   onError: null,
@@ -17,55 +18,67 @@ const VoiceService = {
 
     try {
       this.recognition = new SpeechRecognition();
-      this.recognition.continuous = false; // Capture current utterance
-      this.recognition.interimResults = true; // Stream real-time words
+      // Use continuous=true so Chrome doesn't cut off after 1 second of pause!
+      this.recognition.continuous = true;
+      this.recognition.interimResults = true;
       this.recognition.lang = 'en-US';
 
       this.recognition.onstart = () => {
         this.isRecording = true;
         this.transcript = '';
+        this.finalTranscript = '';
         if (this.onRecordingStateChange) this.onRecordingStateChange(true);
       };
 
       this.recognition.onresult = (event) => {
-        let currentText = '';
+        let interimText = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          currentText += event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            this.finalTranscript += event.results[i][0].transcript + ' ';
+          } else {
+            interimText += event.results[i][0].transcript;
+          }
         }
-        this.transcript = currentText;
+        this.transcript = (this.finalTranscript + interimText).trim();
         if (this.onTranscriptChange) {
           this.onTranscriptChange(this.transcript);
         }
       };
 
       this.recognition.onerror = (event) => {
-        console.warn('Speech recognition event error:', event.error);
+        console.warn('Speech recognition error event:', event.error);
+        if (event.error === 'no-speech') {
+          // Continuous mode: ignore quiet moments without shutting down
+          return;
+        }
+
         this.isRecording = false;
         if (this.onRecordingStateChange) this.onRecordingStateChange(false);
+
         if (this.onError) {
           let msg = 'Could not access microphone.';
           if (event.error === 'not-allowed') {
-            msg = 'Microphone access denied. You can continue typing your symptoms below.';
-          } else if (event.error === 'no-speech') {
-            msg = 'No voice detected. Tap mic again or type below.';
+            msg = window.location.protocol === 'file:'
+              ? 'Chrome restricts mic on local files. Open http://localhost:3000 to keep mic active, or type below.'
+              : 'Microphone permission blocked. Please allow mic in Chrome address bar or type below.';
+          } else if (event.error === 'audio-capture') {
+            msg = 'No microphone device found. Please check your hardware or type below.';
           }
           this.onError(msg);
         }
       };
 
       this.recognition.onend = () => {
-        const wasRecording = this.isRecording;
+        // If the user was still recording and browser timed out, restart automatically
+        if (this.isRecording) {
+          try {
+            this.recognition.start();
+            return;
+          } catch (e) {}
+        }
+
         this.isRecording = false;
         if (this.onRecordingStateChange) this.onRecordingStateChange(false);
-
-        // If a non-empty transcript was gathered, dispatch it
-        if (wasRecording && this.transcript.trim()) {
-          const finalWords = this.transcript.trim();
-          this.transcript = '';
-          if (window.handleUserTriageSubmission) {
-            window.handleUserTriageSubmission(finalWords);
-          }
-        }
       };
 
       return true;
@@ -82,21 +95,36 @@ const VoiceService = {
     }
 
     try {
+      this.finalTranscript = '';
+      this.transcript = '';
       this.recognition.start();
     } catch (e) {
       console.warn('Speech recognition start called while active or restarting', e);
     }
   },
 
-  stop() {
+  stop(submit = true) {
     if (this.recognition && this.isRecording) {
-      this.recognition.stop();
+      this.isRecording = false;
+      try {
+        this.recognition.stop();
+      } catch (e) {}
+    }
+
+    if (this.onRecordingStateChange) this.onRecordingStateChange(false);
+
+    const spokenWords = this.transcript.trim();
+    this.transcript = '';
+    this.finalTranscript = '';
+
+    if (submit && spokenWords && window.handleUserTriageSubmission) {
+      window.handleUserTriageSubmission(spokenWords);
     }
   },
 
   toggle() {
     if (this.isRecording) {
-      this.stop();
+      this.stop(true); // Stop and send what was spoken
     } else {
       this.start();
     }
