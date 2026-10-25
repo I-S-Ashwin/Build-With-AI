@@ -1028,3 +1028,75 @@ body {
   background-color: var(--mondrian-red);
   color: white;
 }
+/* Animated Cursor Tutorial & Skeleton Screen */
+.tutorial-overlay-layer {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 99999;
+  pointer-events: auto;
+}
+
+.tutorial-animated-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+  z-index: 100001;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.8));
+}
+
+.tutorial-tooltip-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 320px;
+  background-color: var(--bg-surface);
+  border: 4px solid var(--mondrian-black);
+  box-shadow: 8px 8px 0px var(--mondrian-black);
+  padding: 1.25rem;
+  z-index: 100000;
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tutorial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.step-indicator {
+  font-size: 0.75rem;
+  font-weight: 800;
+  background-color: var(--mondrian-accent-yellow);
+  color: var(--mondrian-black);
+  padding: 2px 8px;
+  border: 1px solid var(--mondrian-black);
+  text-transform: uppercase;
+}
+
+.tutorial-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  border-top: var(--border-thin);
+  padding-top: 0.75rem;
+}
+
+/* Skeleton Loading Screens */
+.skeleton-box {
+  background: linear-gradient(90deg, var(--bg-subtle) 25%, var(--mondrian-gray-light) 50%, var(--bg-subtle) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s infinite;
+  border: 1px solid var(--mondrian-black);
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

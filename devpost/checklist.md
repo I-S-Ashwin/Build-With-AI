@@ -49,7 +49,7 @@ Build mode: learn
   Learner check: Finish a chat, watch it animate into the history bin, click it to re-open past conversations, and click the Export PDF button.
   Commit: `Add paper-throw save animation, history bin, and PDF export`
 
-- [ ] **5. First-time animated cursor tutorial & skeleton loading screens**
+- [x] **5. First-time animated cursor tutorial & skeleton loading screens**
   Becomes usable: An animated cursor overlay tours the user through the interface on their first visit, and skeleton preview placeholders display during screen transitions.
   Why now: Completes the final onboarding and polish details agreed in the PRD.
   PRD ref: `prd.md > Features and Behavior > Opening and Onboarding > First-time tutorial`, `prd.md > States and Boundaries > Slow network / loading`

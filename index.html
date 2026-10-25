@@ -242,6 +242,32 @@
     </div>
   </section>
 
+  <!-- Tutorial Animated Cursor Overlay -->
+  <div id="tutorial-overlay" class="tutorial-overlay-layer" style="display: none;">
+    <!-- Animated Cursor Pointer -->
+    <div id="tutorial-cursor" class="tutorial-animated-cursor">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="#D62828" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 3l7 18 3-7 7-3L3 3z"></path>
+      </svg>
+    </div>
+
+    <!-- Floating Tooltip Card -->
+    <div id="tutorial-tooltip" class="tutorial-tooltip-card">
+      <div class="tutorial-header">
+        <span id="tutorial-step-badge" class="step-indicator">Step 1 of 3</span>
+        <button type="button" onclick="TutorialService.finish()" style="background:none; border:none; font-size:1.1rem; cursor:pointer; font-weight:800;">&times;</button>
+      </div>
+      <h3 id="tutorial-step-title" style="font-size: 1.15rem; font-weight: 900; margin-bottom: 0.35rem;">Tour Guide</h3>
+      <p id="tutorial-step-desc" style="font-size: 0.9rem; line-height: 1.45; color: var(--text-muted);">
+        Tutorial step description goes here.
+      </p>
+      <div class="tutorial-actions">
+        <button type="button" onclick="TutorialService.finish()" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Skip Tour</button>
+        <button type="button" onclick="TutorialService.nextStep()" class="btn btn-primary" style="padding: 0.35rem 0.95rem; font-size: 0.8rem;">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Session Details Modal -->
   <div id="modal-session-details" class="modal-backdrop">
     <div class="modal-dialog" style="max-width: 600px;">
@@ -299,6 +325,7 @@
   <script src="gemini.js"></script>
   <script src="voice.js"></script>
   <script src="history.js"></script>
+  <script src="tutorial.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
