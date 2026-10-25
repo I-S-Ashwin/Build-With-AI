@@ -128,13 +128,14 @@ const VoiceService = {
             this.transcript = '';
             window.handleUserTriageSubmission(words);
           } else {
-            // Otherwise, send raw voice audio recording directly to Gemini AI!
+            // Send raw voice audio recording
+            const audioUrl = URL.createObjectURL(audioBlob);
             const reader = new FileReader();
             reader.readAsDataURL(audioBlob);
             reader.onloadend = () => {
               const base64Data = reader.result.split(',')[1];
               if (window.handleAudioTriageSubmission) {
-                window.handleAudioTriageSubmission(base64Data, recordType);
+                window.handleAudioTriageSubmission(base64Data, recordType, audioUrl, audioBlob);
               }
             };
           }

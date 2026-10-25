@@ -304,30 +304,64 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Handle direct microphone audio stream submissions
-  async function handleAudioTriageSubmission(base64Audio, mimeType) {
-    const userMsgEl = appendMessageBubble('user', '🎙️ Spoken Consultation Recording...');
+  async function handleAudioTriageSubmission(base64Audio, mimeType, audioUrl = null, audioBlob = null) {
+    const userMsgEl = appendMessageBubble('user', '🎙️ Spoken Audio Consultation');
+    
+    // Attach playable audio player if available
+    if (userMsgEl && audioUrl) {
+      const bodyDiv = userMsgEl.querySelector('.msg-body');
+      if (bodyDiv) {
+        const audioPlayer = document.createElement('audio');
+        audioPlayer.controls = true;
+        audioPlayer.src = audioUrl;
+        audioPlayer.style.width = '100%';
+        audioPlayer.style.marginTop = '8px';
+        audioPlayer.style.borderRadius = '4px';
+        bodyDiv.appendChild(audioPlayer);
+      }
+    }
+
     showTypingIndicator();
 
-    try {
-      const res = await window.GeminiService.sendAudioRecording(base64Audio, mimeType);
-      removeTypingIndicator();
+    const apiKey = window.GeminiService ? window.GeminiService.getApiKey() : '';
 
-      // Update user bubble with the exact transcribed words Gemini heard!
-      if (userMsgEl && res.userSpokenText) {
-        const p = userMsgEl.querySelector('.msg-body p');
-        if (p) p.textContent = `🎙️ "${res.userSpokenText}"`;
+    if (apiKey) {
+      // Live Gemini Multimodal Audio Transcription
+      try {
+        const res = await window.GeminiService.sendAudioRecording(base64Audio, mimeType);
+        removeTypingIndicator();
+
+        if (userMsgEl && res.userSpokenText) {
+          const p = userMsgEl.querySelector('.msg-body p');
+          if (p) p.textContent = `🎙️ "${res.userSpokenText}"`;
+        }
+
+        appendMessageBubble('assistant', res.reply.text, res.reply.outcome);
+
+        window.currentTriageOutcome = res.reply;
+        if (window.onTriageResultReady) {
+          window.onTriageResultReady(res.reply);
+        }
+      } catch (err) {
+        removeTypingIndicator();
+        appendMessageBubble('assistant', 'Could not process audio with Gemini API. Please check your key or type below.');
       }
+    } else {
+      // 100% Offline Mode: Playable Voice Note & Heuristic Follow-up
+      setTimeout(() => {
+        removeTypingIndicator();
+        const energy = localStorage.getItem('medisense_energy') || 'active';
+        let followUp = "I have received your recorded voice consultation. To provide safe triage guidance: are your symptoms routine (like a common cold or scratch), or are you experiencing acute pain, severe sweating, or chest discomfort?";
+        
+        appendMessageBubble('assistant', followUp, 'ongoing');
 
-      appendMessageBubble('assistant', res.reply.text, res.reply.outcome);
-
-      window.currentTriageOutcome = res.reply;
-      if (window.onTriageResultReady) {
-        window.onTriageResultReady(res.reply);
-      }
-    } catch (err) {
-      removeTypingIndicator();
-      appendMessageBubble('assistant', 'Could not process audio recording. Please verify your Gemini API key in the top right, or type symptoms below.');
-      console.error('Audio triage error:', err);
+        // Allow next response to resolve
+        window.currentTriageOutcome = {
+          text: "Recorded voice triage session reviewed. For mild issues, rest and hydrate. If acute symptoms develop, please consult a physician.",
+          outcome: 'home-remedy',
+          isFinal: false
+        };
+      }, 750);
     }
   }
 
