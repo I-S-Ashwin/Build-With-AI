@@ -70,7 +70,9 @@ const VoiceService = {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
       this.recognition.interimResults = true;
-      this.recognition.lang = 'en-US';
+      // Auto-detect browser/system locale (e.g. en-IN or en-US)
+      this.recognition.lang = navigator.language || 'en-IN';
+      console.log('Speech recognition initialized with locale:', this.recognition.lang);
 
       this.recognition.onstart = () => {
         this.isRecording = true;
@@ -85,19 +87,26 @@ const VoiceService = {
           text += event.results[i][0].transcript + ' ';
         }
         this.transcript = text.trim();
+        console.log('Recognized speech text:', this.transcript);
         if (this.onTranscriptChange) {
           this.onTranscriptChange(this.transcript);
         }
       };
 
       this.recognition.onerror = (event) => {
-        console.warn('Speech recognition error:', event.error);
-        if (event.error === 'not-allowed') {
-          this.isRecording = false;
-          this.stopAudioMeter();
-          if (this.onRecordingStateChange) this.onRecordingStateChange(false);
-          if (this.onError) {
+        console.warn('Speech recognition error event:', event.error);
+        if (this.onError) {
+          if (event.error === 'network') {
+            this.onError('Speech cloud server unreachable. Please type symptoms in the text box below.');
+          } else if (event.error === 'no-speech') {
+            this.onError('Listening... Speak a bit louder or closer to the mic, or type below.');
+          } else if (event.error === 'not-allowed') {
+            this.isRecording = false;
+            this.stopAudioMeter();
+            if (this.onRecordingStateChange) this.onRecordingStateChange(false);
             this.onError('Microphone access blocked. Please type your symptoms below.');
+          } else {
+            this.onError(`Audio note: ${event.error}. You can also type below.`);
           }
         }
       };
