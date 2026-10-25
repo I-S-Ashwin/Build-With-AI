@@ -182,6 +182,78 @@ GUIDELINES:
       outcome,
       raw: rawText
     };
+  },
+
+  // Direct Audio Processing via Gemini 1.5 Flash Multimodal Audio API
+  async sendAudioRecording(base64Audio, mimeType = 'audio/webm') {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
+      return {
+        userSpokenText: 'Spoken Audio Recording',
+        reply: {
+          text: 'To let Gemini listen to your real voice recording directly, please paste your free Gemini API key into the "🔑 API Key" button in the top right!',
+          isFinal: false,
+          outcome: 'ongoing'
+        }
+      };
+    }
+
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const contents = [
+      {
+        role: 'user',
+        parts: [
+          { text: `SYSTEM INSTRUCTIONS: ${this.SYSTEM_INSTRUCTION}\nListen to this patient's audio recording. First, transcribe their exact words in the format [TRANSCRIPT: <words spoken>]. Then on the next line, provide your triage assessment or single follow-up question per the system rules.` },
+          {
+            inline_data: {
+              mime_type: mimeType,
+              data: base64Audio
+            }
+          }
+        ]
+      }
+    ];
+
+    const payload = {
+      contents,
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 350
+      }
+    };
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `Gemini Audio Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    let userSpokenText = 'Audio consultation';
+    let replyText = candidateText;
+
+    const transcriptMatch = candidateText.match(/\[TRANSCRIPT:\s*(.*?)\]/i);
+    if (transcriptMatch) {
+      userSpokenText = transcriptMatch[1].trim();
+      replyText = candidateText.replace(/\[TRANSCRIPT:\s*.*?\]/i, '').trim();
+    }
+
+    this.history.push({ role: 'user', text: userSpokenText });
+    this.history.push({ role: 'model', text: replyText });
+    this.questionCount++;
+
+    return {
+      userSpokenText,
+      reply: this.parseResponseMetadata(replyText)
+    };
   }
 };
 

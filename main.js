@@ -303,6 +303,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Handle direct microphone audio stream submissions
+  async function handleAudioTriageSubmission(base64Audio, mimeType) {
+    const userMsgEl = appendMessageBubble('user', '🎙️ Spoken Consultation Recording...');
+    showTypingIndicator();
+
+    try {
+      const res = await window.GeminiService.sendAudioRecording(base64Audio, mimeType);
+      removeTypingIndicator();
+
+      // Update user bubble with the exact transcribed words Gemini heard!
+      if (userMsgEl && res.userSpokenText) {
+        const p = userMsgEl.querySelector('.msg-body p');
+        if (p) p.textContent = `🎙️ "${res.userSpokenText}"`;
+      }
+
+      appendMessageBubble('assistant', res.reply.text, res.reply.outcome);
+
+      window.currentTriageOutcome = res.reply;
+      if (window.onTriageResultReady) {
+        window.onTriageResultReady(res.reply);
+      }
+    } catch (err) {
+      removeTypingIndicator();
+      appendMessageBubble('assistant', 'Could not process audio recording. Please verify your Gemini API key in the top right, or type symptoms below.');
+      console.error('Audio triage error:', err);
+    }
+  }
+
+  window.handleAudioTriageSubmission = handleAudioTriageSubmission;
+
   if (formChatText) {
     formChatText.addEventListener('submit', (e) => {
       e.preventDefault();

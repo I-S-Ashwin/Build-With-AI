@@ -1,21 +1,29 @@
-// MediSense — Enhanced Voice Recognition & Microphone Level Visualizer
+// MediSense — Dual Voice Engine: Real-Time Speech + Direct Hardware Audio Recording
 
 const VoiceService = {
   recognition: null,
-  isRecording: false,
-  transcript: '',
+  mediaRecorder: null,
+  audioChunks: [],
   audioStream: null,
   audioContext: null,
   analyser: null,
   animFrameId: null,
+  isRecording: false,
+  transcript: '',
   onTranscriptChange: null,
   onRecordingStateChange: null,
   onError: null,
 
-  async initAudioMeter() {
+  async start() {
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      this.isRecording = true;
+      this.transcript = '';
+      this.audioChunks = [];
+
+      // 1. Get raw hardware microphone stream
       this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // 2. Hardware Audio Volume Visualizer Meter
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioContext = new AudioContext();
       const source = this.audioContext.createMediaStreamSource(this.audioStream);
@@ -36,115 +44,58 @@ const VoiceService = {
         for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
         const avg = sum / dataArray.length;
         const percent = Math.min(100, Math.round((avg / 128) * 100));
-
-        if (meterEl) {
-          meterEl.style.width = `${Math.max(5, percent)}%`;
-        }
+        if (meterEl) meterEl.style.width = `${Math.max(5, percent)}%`;
         this.animFrameId = requestAnimationFrame(checkVolume);
       };
       checkVolume();
-    } catch (e) {
-      console.warn('Microphone hardware level check not available:', e);
+
+      // 3. Hardware MediaRecorder: Records actual voice bytes
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+      this.mediaRecorder = new MediaRecorder(this.audioStream, { mimeType });
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          this.audioChunks.push(e.data);
+        }
+      };
+      this.mediaRecorder.start(250); // Record in 250ms chunks
+
+      if (this.onRecordingStateChange) this.onRecordingStateChange(true);
+
+      // 4. Try browser speech recognition in parallel if supported
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        try {
+          this.recognition = new SpeechRecognition();
+          this.recognition.continuous = true;
+          this.recognition.interimResults = true;
+          this.recognition.lang = navigator.language || 'en-IN';
+          this.recognition.onresult = (event) => {
+            let text = '';
+            for (let i = 0; i < event.results.length; i++) {
+              text += event.results[i][0].transcript + ' ';
+            }
+            this.transcript = text.trim();
+            if (this.onTranscriptChange) this.onTranscriptChange(this.transcript);
+          };
+          this.recognition.start();
+        } catch (e) {}
+      }
+
+    } catch (err) {
+      console.error('Failed to start microphone recording:', err);
+      this.isRecording = false;
+      if (this.onRecordingStateChange) this.onRecordingStateChange(false);
+      if (this.onError) this.onError('Microphone access denied. Please click the address bar lock icon to allow mic.');
     }
   },
 
-  stopAudioMeter() {
+  async stop(submit = true) {
+    if (!this.isRecording) return;
+    this.isRecording = false;
+
     if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
-    if (this.audioStream) {
-      this.audioStream.getTracks().forEach(t => t.stop());
-      this.audioStream = null;
-    }
-    if (this.audioContext && this.audioContext.state !== 'closed') {
-      this.audioContext.close().catch(() => {});
-      this.audioContext = null;
-    }
     const meterEl = document.getElementById('mic-volume-bar');
     if (meterEl) meterEl.style.width = '0%';
-  },
-
-  init() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return false;
-
-    try {
-      this.recognition = new SpeechRecognition();
-      this.recognition.continuous = true;
-      this.recognition.interimResults = true;
-      // Auto-detect browser/system locale (e.g. en-IN or en-US)
-      this.recognition.lang = navigator.language || 'en-IN';
-      console.log('Speech recognition initialized with locale:', this.recognition.lang);
-
-      this.recognition.onstart = () => {
-        this.isRecording = true;
-        this.transcript = '';
-        if (this.onRecordingStateChange) this.onRecordingStateChange(true);
-        this.initAudioMeter();
-      };
-
-      this.recognition.onresult = (event) => {
-        let text = '';
-        for (let i = 0; i < event.results.length; i++) {
-          text += event.results[i][0].transcript + ' ';
-        }
-        this.transcript = text.trim();
-        console.log('Recognized speech text:', this.transcript);
-        if (this.onTranscriptChange) {
-          this.onTranscriptChange(this.transcript);
-        }
-      };
-
-      this.recognition.onerror = (event) => {
-        console.warn('Speech recognition error event:', event.error);
-        if (this.onError) {
-          if (event.error === 'network') {
-            this.onError('Speech cloud server unreachable. Please type symptoms in the text box below.');
-          } else if (event.error === 'no-speech') {
-            this.onError('Listening... Speak a bit louder or closer to the mic, or type below.');
-          } else if (event.error === 'not-allowed') {
-            this.isRecording = false;
-            this.stopAudioMeter();
-            if (this.onRecordingStateChange) this.onRecordingStateChange(false);
-            this.onError('Microphone access blocked. Please type your symptoms below.');
-          } else {
-            this.onError(`Audio note: ${event.error}. You can also type below.`);
-          }
-        }
-      };
-
-      this.recognition.onend = () => {
-        if (!this.isRecording) {
-          this.stopAudioMeter();
-          if (this.onRecordingStateChange) this.onRecordingStateChange(false);
-        }
-      };
-
-      return true;
-    } catch (e) {
-      console.error('Speech initialization error', e);
-      return false;
-    }
-  },
-
-  async start() {
-    if (!this.recognition && !this.init()) {
-      if (this.onError) this.onError('Speech recognition not available. Please type your symptoms below.');
-      return;
-    }
-
-    try {
-      this.transcript = '';
-      this.recognition.start();
-    } catch (e) {
-      try {
-        this.recognition.stop();
-        setTimeout(() => this.recognition.start(), 200);
-      } catch (err) {}
-    }
-  },
-
-  stop(submit = true) {
-    this.isRecording = false;
-    this.stopAudioMeter();
 
     if (this.recognition) {
       try { this.recognition.stop(); } catch (e) {}
@@ -152,11 +103,45 @@ const VoiceService = {
 
     if (this.onRecordingStateChange) this.onRecordingStateChange(false);
 
-    const spoken = this.transcript.trim();
-    this.transcript = '';
+    // Stop MediaRecorder and grab audio file
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      const recordType = this.mediaRecorder.mimeType || 'audio/webm';
+      
+      this.mediaRecorder.onstop = () => {
+        // Stop audio tracks
+        if (this.audioStream) {
+          this.audioStream.getTracks().forEach(t => t.stop());
+          this.audioStream = null;
+        }
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+          this.audioContext.close().catch(() => {});
+          this.audioContext = null;
+        }
 
-    if (submit && spoken && window.handleUserTriageSubmission) {
-      window.handleUserTriageSubmission(spoken);
+        const audioBlob = new Blob(this.audioChunks, { type: recordType });
+        this.audioChunks = [];
+
+        if (submit) {
+          // If browser speech recognition produced text, use it directly
+          if (this.transcript && this.transcript.trim() && window.handleUserTriageSubmission) {
+            const words = this.transcript.trim();
+            this.transcript = '';
+            window.handleUserTriageSubmission(words);
+          } else {
+            // Otherwise, send raw voice audio recording directly to Gemini AI!
+            const reader = new FileReader();
+            reader.readAsDataURL(audioBlob);
+            reader.onloadend = () => {
+              const base64Data = reader.result.split(',')[1];
+              if (window.handleAudioTriageSubmission) {
+                window.handleAudioTriageSubmission(base64Data, recordType);
+              }
+            };
+          }
+        }
+      };
+
+      this.mediaRecorder.stop();
     }
   },
 
