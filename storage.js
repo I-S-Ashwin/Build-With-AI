@@ -68,6 +68,17 @@ const Storage = {
       console.error('Failed to save session', e);
       return [];
     }
+  },
+
+  deleteSession(sessionId) {
+    try {
+      const sessions = this.getSessions().filter(s => s.id !== sessionId);
+      localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(sessions));
+      return sessions;
+    } catch (e) {
+      console.error('Failed to delete session', e);
+      return [];
+    }
   }
 };
 

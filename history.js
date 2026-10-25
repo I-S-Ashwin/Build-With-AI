@@ -136,7 +136,8 @@ const HistoryService = {
         <div class="history-card-summary">${this.escapeHtml(session.summary)}</div>
         <div class="history-card-actions">
           <button class="btn btn-secondary btn-card-action" onclick="HistoryService.viewSessionDetails('${session.id}')">View</button>
-          <button class="btn btn-primary btn-card-action" onclick="HistoryService.exportPdf('${session.id}')">Export PDF</button>
+          <button class="btn btn-primary btn-card-action" onclick="HistoryService.exportPdf('${session.id}')">PDF</button>
+          <button class="btn btn-secondary btn-card-action btn-delete-action" onclick="HistoryService.deleteSession('${session.id}')" title="Delete consultation">&times;</button>
         </div>
       `;
 
@@ -190,7 +191,26 @@ const HistoryService = {
       this.exportPdf(sessionId);
     };
 
+    const btnDetailsDelete = document.getElementById('btn-details-delete');
+    if (btnDetailsDelete) {
+      btnDetailsDelete.onclick = () => {
+        modal.classList.remove('active');
+        this.deleteSession(sessionId);
+      };
+    }
+
     modal.classList.add('active');
+  },
+
+  deleteSession(sessionId) {
+    if (!confirm('Are you sure you want to delete this consultation from your chat bin?')) {
+      return;
+    }
+    if (window.Storage) {
+      window.Storage.deleteSession(sessionId);
+    }
+    this.renderHistory();
+    this.showToast('Consultation removed from Chat Bin.');
   },
 
   // Export Session to Formatted Printable PDF

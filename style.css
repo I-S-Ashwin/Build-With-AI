@@ -1014,3 +1014,17 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+/* Delete action on history cards */
+.btn-delete-action {
+  flex: 0 0 32px;
+  background-color: var(--bg-subtle);
+  color: var(--mondrian-red);
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.btn-delete-action:hover {
+  background-color: var(--mondrian-red);
+  color: white;
+}
