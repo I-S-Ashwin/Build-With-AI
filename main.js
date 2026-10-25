@@ -347,21 +347,52 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessageBubble('assistant', 'Could not process audio with Gemini API. Please check your key or type below.');
       }
     } else {
-      // 100% Offline Mode: Playable Voice Note & Heuristic Follow-up
-      setTimeout(() => {
-        removeTypingIndicator();
-        const energy = localStorage.getItem('medisense_energy') || 'active';
-        let followUp = "I have received your recorded voice consultation. To provide safe triage guidance: are your symptoms routine (like a common cold or scratch), or are you experiencing acute pain, severe sweating, or chest discomfort?";
-        
-        appendMessageBubble('assistant', followUp, 'ongoing');
+      // 100% Offline Mode: On-Device OpenAI Whisper (via Transformers.js WebAssembly)
+      const statusLabel = document.createElement('div');
+      statusLabel.style.fontSize = '0.75rem';
+      statusLabel.style.fontWeight = '700';
+      statusLabel.style.color = 'var(--text-muted)';
+      statusLabel.style.marginTop = '4px';
+      statusLabel.textContent = 'Transcribing voice on-device with OpenAI Whisper...';
+      if (userMsgEl) userMsgEl.querySelector('.msg-body').appendChild(statusLabel);
 
-        // Allow next response to resolve
-        window.currentTriageOutcome = {
-          text: "Recorded voice triage session reviewed. For mild issues, rest and hydrate. If acute symptoms develop, please consult a physician.",
-          outcome: 'home-remedy',
-          isFinal: false
-        };
-      }, 750);
+      if (window.LocalWhisperService && audioBlob) {
+        try {
+          const transcribedText = await window.LocalWhisperService.transcribeAudioBlob(audioBlob, (statusText) => {
+            statusLabel.textContent = statusText;
+          });
+
+          removeTypingIndicator();
+          statusLabel.remove();
+
+          if (transcribedText && transcribedText.trim()) {
+            // Update user message bubble with the exact words Whisper transcribed!
+            const p = userMsgEl.querySelector('.msg-body p');
+            if (p) p.textContent = `🎙️ "${transcribedText}"`;
+
+            // Now analyze the transcribed words through our medical triage engine!
+            showTypingIndicator();
+            const result = await window.GeminiService.sendMessage(transcribedText);
+            removeTypingIndicator();
+
+            appendMessageBubble('assistant', result.text, result.outcome);
+
+            window.currentTriageOutcome = result;
+            if (window.onTriageResultReady) {
+              window.onTriageResultReady(result);
+            }
+            return;
+          }
+        } catch (err) {
+          console.warn('Local Whisper on-device transcription error, falling back:', err);
+          statusLabel.remove();
+        }
+      }
+
+      // Safe Fallback if WebAssembly transcription is unready
+      removeTypingIndicator();
+      let followUp = "I have received your recorded voice consultation. Could you tell me more about how many days you've felt this way?";
+      appendMessageBubble('assistant', followUp, 'ongoing');
     }
   }
 
