@@ -1,4 +1,5 @@
 // MediSense — Gemini AI Triage Engine
+// Knowledge Base is loaded from knowledge-base.js (116 conditions from Kaggle dataset)
 
 const GeminiService = {
   history: [], // [{ role: 'user'|'model', text: '...' }]
@@ -103,56 +104,113 @@ GUIDELINES:
     return this.parseResponseMetadata(botResponse);
   },
 
-  // Intelligent local triage fallback for offline / key-free exploration
+  // ─── Knowledge-Base Powered Local Triage (116 diseases from Kaggle dataset) ───
   localTriageFallback(userMessage, hadApiError = false) {
     const fullConversation = this.history.map(m => m.text).join(' ').toLowerCase();
-    let replyText = '';
-    let isFinal = false;
-    let outcome = 'ongoing';
+    const kb = (typeof MEDISENSE_KB !== 'undefined') ? MEDISENSE_KB : [];
 
-    // Serious flag triggers (heart, sweating + unwell, severe pain, breathing)
-    const seriousTriggers = ['sweat', 'sweating', 'chest', 'heart', 'faint', 'shortness of breath', 'numb', 'collapse', 'vomiting blood'];
-    const isSerious = seriousTriggers.some(trigger => fullConversation.includes(trigger));
+    // ── Emergency override: always escalate for these triggers ──
+    const emergencyTriggers = [
+      'chest pain', 'heart attack', 'stroke', 'collapse', 'vomiting blood',
+      'coughing blood', 'blood in stool', 'seizure', 'unconscious', 'can\'t breathe',
+      'not breathing', 'shortness of breath severe', 'severe bleeding', 'anaphylaxis',
+      'blue lips', 'cholera', 'sepsis', 'appendicitis', 'tetanus', 'rabies', 'ebola'
+    ];
+    const isEmergency = emergencyTriggers.some(t => fullConversation.includes(t));
+    if (isEmergency) {
+      const reply = `[DIAGNOSIS_DOCTOR] ⚠️ EMERGENCY: What you've described could be a life-threatening emergency. Please call emergency services (911 or 112) immediately or have someone take you to the nearest emergency room right now. Do not wait.`;
+      this.history.push({ role: 'model', text: reply });
+      return this.parseResponseMetadata(reply);
+    }
 
-    // Minor cold/scratch triggers across full session context
-    const isCold = fullConversation.includes('cold') || fullConversation.includes('cough') || fullConversation.includes('sneez') || fullConversation.includes('throat') || fullConversation.includes('runny') || fullConversation.includes('fever');
-    const isScratch = fullConversation.includes('scratch') || fullConversation.includes('cut') || fullConversation.includes('scrape') || fullConversation.includes('bruise') || fullConversation.includes('wound') || fullConversation.includes('skin');
+    // ── Score each condition in the knowledge base ──
+    const scores = kb.map(condition => {
+      let score = 0;
+      const text = fullConversation;
 
-    if (isSerious) {
-      replyText = `[DIAGNOSIS_DOCTOR] What you're experiencing—especially symptoms like profuse sweating, feeling acutely unwell, or chest discomfort—can be signs of a serious underlying condition. Please do not wait. You should be examined by a doctor or emergency clinic immediately.`;
-      isFinal = true;
-      outcome = 'see-doctor';
-    } else if (this.questionCount === 1) {
-      if (isCold) {
-        replyText = `I hear you. Colds are frustrating to navigate when you're busy. Could you tell me: how many days have you had these symptoms, and do you currently have a high fever or body chills?`;
-      } else if (isScratch) {
-        replyText = `Let's take a look at that scrape. Is the skin actively bleeding, and is there any dirt or swelling around the scratch?`;
+      // Keyword matching (primary signal)
+      condition.keywords.forEach(kw => {
+        if (text.includes(kw.toLowerCase())) score += 3;
+      });
+
+      // Symptom signals from conversation
+      if (condition.symptoms.fever && (text.includes('fever') || text.includes('temperature') || text.includes('hot'))) score += 2;
+      if (condition.symptoms.cough && (text.includes('cough') || text.includes('coughing'))) score += 2;
+      if (condition.symptoms.fatigue && (text.includes('tired') || text.includes('fatigue') || text.includes('exhausted') || text.includes('weak'))) score += 2;
+      if (condition.symptoms.breathingDifficulty && (text.includes('breath') || text.includes('wheez') || text.includes('breathing'))) score += 2;
+
+      return { condition, score };
+    });
+
+    // Sort by score, best match first
+    scores.sort((a, b) => b.score - a.score);
+    const best = scores[0];
+    const hasMatch = best && best.score >= 3;
+
+    // ── First message: ask one follow-up question ──
+    if (this.questionCount === 1) {
+      if (hasMatch) {
+        const c = best.condition;
+        // Pick a smart follow-up based on what we already know
+        const followUps = {
+          respiratory: `How long have you had these symptoms, and is there any fever or difficulty breathing?`,
+          cardiovascular: `Is the discomfort constant or does it come and go? Any sweating, dizziness, or pain spreading to your arm or jaw?`,
+          digestive: `Are you experiencing any nausea, vomiting, or changes in your bowel movements?`,
+          neurological: `Is this a new symptom or something that's been happening before? Any visual disturbances or weakness?`,
+          musculoskeletal: `Is the pain localised to one area, and does it worsen with movement? Any recent injury?`,
+          dermatological: `Is the rash spreading, and is there any itching, pain, or associated fever?`,
+          mental_health: `How long have you felt this way, and is it affecting your daily life or sleep?`,
+          metabolic: `Do you have a history of diabetes or thyroid conditions? When did these symptoms start?`,
+          urological: `Is there any pain or burning when you urinate, or any blood in your urine?`,
+          infectious: `Have you been in contact with anyone ill, or recently travelled to a different region?`,
+          default: `How long have you been experiencing this, and has it been getting worse over time?`
+        };
+        const question = followUps[c.category] || followUps.default;
+        const reply = `Based on what you've shared, this could be related to **${c.name}**. To give you better guidance — ${question}`;
+        this.history.push({ role: 'model', text: reply });
+        if (hadApiError) console.info('Local KB triage: first exchange.');
+        return this.parseResponseMetadata(reply);
       } else {
-        replyText = `Thank you for sharing that with me. To understand what's happening better: how long have you felt this way, and has it gotten steadily worse over today?`;
-      }
-    } else {
-      // 2nd exchange -> Provide resolution
-      if (isScratch) {
-        replyText = `[DIAGNOSIS_HOME] For a mild scratch or surface graze: gently clean the area with mild soap and clean water, apply an antiseptic cream or petroleum jelly, and cover with a sterile bandage. If it becomes hot, swollen, or produces pus over the next few days, consult a physician.`;
-        isFinal = true;
-        outcome = 'home-remedy';
-      } else if (isCold) {
-        replyText = `[DIAGNOSIS_HOME] This aligns with a routine viral cold episode. The most effective course is warm fluids (herbal tea or broth), plenty of restorative sleep, and steam inhalation for congestion. Since you experience these occasionally, rest for 48 hours. If fever spikes over 101°F or persists past 7 days, check with your physician.`;
-        isFinal = true;
-        outcome = 'home-remedy';
-      } else {
-        replyText = `[DIAGNOSIS_DOCTOR] Based on what you've described, I am not confident providing a home remedy for this specific combination of symptoms. For your peace of mind and safety, please have a healthcare professional or local clinic evaluate this.`;
-        isFinal = true;
-        outcome = 'see-doctor';
+        const reply = `Thank you for sharing that with me. To understand what's happening better: how long have you felt this way, and has it been getting steadily worse?`;
+        this.history.push({ role: 'model', text: reply });
+        return this.parseResponseMetadata(reply);
       }
     }
 
-    if (hadApiError) {
-      console.info('Response handled via MediSense local safety fallback.');
+    // ── Second message: deliver the diagnosis ──
+    if (hasMatch) {
+      const c = best.condition;
+      const isHighUrgency = ['high', 'emergency'].includes(c.urgency);
+      const isMedUrgency = c.urgency === 'moderate';
+
+      // Format red flags list
+      const redFlagsList = c.redFlags.slice(0, 3).map(f => `• ${f}`).join('\n');
+
+      let prefix, urgencyNote;
+      if (c.urgency === 'emergency') {
+        prefix = '[DIAGNOSIS_DOCTOR]';
+        urgencyNote = `🚨 **This requires emergency care.** Please call 911/112 or go to the ER immediately.`;
+      } else if (isHighUrgency) {
+        prefix = '[DIAGNOSIS_DOCTOR]';
+        urgencyNote = `⚕️ **Please see a doctor soon** — ideally within 24 hours.`;
+      } else if (isMedUrgency) {
+        prefix = '[DIAGNOSIS_DOCTOR]';
+        urgencyNote = `👨‍⚕️ **Consider seeing a doctor** if symptoms persist or worsen.`;
+      } else {
+        prefix = '[DIAGNOSIS_HOME]';
+        urgencyNote = `✅ **This can likely be managed at home**, but monitor closely.`;
+      }
+
+      const reply = `${prefix} Based on your symptoms, this appears consistent with **${c.name}**.\n\n${urgencyNote}\n\n**What to do:** ${c.advice}\n\n**Watch out for (see a doctor if any appear):**\n${redFlagsList}`;
+      this.history.push({ role: 'model', text: reply });
+      if (hadApiError) console.info('Local KB triage: diagnosis delivered.');
+      return this.parseResponseMetadata(reply);
     }
 
-    this.history.push({ role: 'model', text: replyText });
-    return this.parseResponseMetadata(replyText);
+    // ── Fallback if nothing matched ──
+    const reply = `[DIAGNOSIS_DOCTOR] Based on what you've described, I wasn't able to confidently match this to a specific condition in my local knowledge base. For your safety, please consult a healthcare professional or local clinic who can properly evaluate your symptoms.`;
+    this.history.push({ role: 'model', text: reply });
+    return this.parseResponseMetadata(reply);
   },
 
   parseResponseMetadata(rawText) {
