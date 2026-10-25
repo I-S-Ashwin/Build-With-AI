@@ -793,3 +793,108 @@ body {
   width: 100%;
   padding: 2rem;
 }
+/* Live Voice Speech Transcript Banner */
+.voice-transcript-banner {
+  background-color: var(--mondrian-accent-yellow);
+  color: var(--mondrian-black);
+  border-top: var(--border-medium);
+  padding: 0.6rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  animation: fadeInRise 0.2s ease forwards;
+}
+
+.live-dot {
+  width: 12px;
+  height: 12px;
+  background-color: var(--mondrian-red);
+  border: 2px solid var(--mondrian-black);
+  border-radius: 50%;
+  animation: pulseRecording 1s infinite;
+}
+
+/* Full-Screen Cinematic Response Overlay */
+.fullscreen-response-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(17, 17, 17, 0.92);
+  backdrop-filter: blur(8px);
+  z-index: 10001;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem;
+  animation: cinematicFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cinematicFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.fullscreen-response-card {
+  width: 100%;
+  max-width: 920px;
+  max-height: 85vh;
+  background-color: var(--bg-surface);
+  border: 6px solid var(--mondrian-black);
+  box-shadow: 12px 12px 0px var(--mondrian-black);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.response-accent-strip {
+  height: 16px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 3fr 1fr;
+  border-bottom: 4px solid var(--mondrian-black);
+}
+.response-accent-strip .r { background: var(--mondrian-red); border-right: 3px solid var(--mondrian-black); }
+.response-accent-strip .y { background: var(--mondrian-accent-yellow); border-right: 3px solid var(--mondrian-black); }
+.response-accent-strip .w { background: var(--mondrian-white); border-right: 3px solid var(--mondrian-black); }
+.response-accent-strip .b { background: var(--mondrian-blue); }
+
+.response-content-area {
+  padding: 3.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+.fullscreen-title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.fullscreen-body-scroll {
+  border-left: 8px solid var(--mondrian-red);
+  padding-left: 1.75rem;
+  margin: 1rem 0;
+}
+
+.fullscreen-body-scroll.home-remedy {
+  border-left-color: var(--mondrian-accent-yellow);
+}
+
+.fullscreen-body-text {
+  font-size: 1.45rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.fullscreen-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: var(--border-medium);
+  padding-top: 2rem;
+  margin-top: 1rem;
+}

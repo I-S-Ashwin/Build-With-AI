@@ -146,6 +146,12 @@
           <!-- Dynamic conversation bubbles will append here in Slice 2 -->
         </div>
 
+        <!-- Live Voice Speech Transcript Preview Banner -->
+        <div id="live-voice-preview" class="voice-transcript-banner" style="display: none;">
+          <span class="live-dot"></span>
+          <span id="live-voice-text">Listening...</span>
+        </div>
+
         <!-- Chat Input Bar (Bottom Center Focused) -->
         <div class="chat-input-bar">
           <div class="voice-control-center">
@@ -182,6 +188,43 @@
     </div>
   </section>
 
+  <!-- Screen 5: Full-Screen Cinematic Response Overlay -->
+  <section id="screen-fullscreen-response" class="fullscreen-response-overlay" style="display: none;">
+    <div class="fullscreen-response-card">
+      <div class="response-accent-strip">
+        <div class="r"></div>
+        <div class="y"></div>
+        <div class="w"></div>
+        <div class="b"></div>
+      </div>
+      
+      <div class="response-content-area">
+        <div id="fullscreen-outcome-pill" class="triage-outcome-tag tag-doctor" style="font-size: 1rem; padding: 0.5rem 1.25rem;">
+          Clinical Recommendation
+        </div>
+        
+        <h2 id="fullscreen-headline" class="fullscreen-title">
+          Triage Assessment
+        </h2>
+        
+        <div class="fullscreen-body-scroll">
+          <p id="fullscreen-advice-text" class="fullscreen-body-text">
+            Diagnosis details will appear here.
+          </p>
+        </div>
+
+        <div class="fullscreen-actions">
+          <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 700;">
+            MediSense Personal Healthcare Safety Net
+          </span>
+          <button id="btn-fullscreen-dismiss" class="btn btn-primary" style="font-size: 1.15rem; padding: 1rem 2rem;">
+            Save Consultation &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- API Key Settings Modal -->
   <div id="modal-api-key" class="modal-backdrop">
     <div class="modal-dialog">
@@ -210,6 +253,7 @@
   <script src="config.js"></script>
   <script src="storage.js"></script>
   <script src="gemini.js"></script>
+  <script src="voice.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

@@ -265,10 +265,95 @@ document.addEventListener('DOMContentLoaded', () => {
   // Expose submission handler for voice integration in Slice 3
   window.handleUserTriageSubmission = handleUserTriageSubmission;
 
+  // 8. Voice Recognition Setup (Slice 3)
+  const btnMic = document.getElementById('btn-mic-record');
+  const micStatusText = document.getElementById('mic-status-text');
+  const liveVoicePreview = document.getElementById('live-voice-preview');
+  const liveVoiceText = document.getElementById('live-voice-text');
+
+  if (window.VoiceService && btnMic) {
+    window.VoiceService.onRecordingStateChange = (isRec) => {
+      if (isRec) {
+        btnMic.classList.add('recording');
+        if (micStatusText) micStatusText.textContent = 'Listening... Speak your symptoms clearly';
+        if (liveVoicePreview) liveVoicePreview.style.display = 'flex';
+      } else {
+        btnMic.classList.remove('recording');
+        if (micStatusText) micStatusText.textContent = 'Tap microphone to speak symptoms';
+        if (liveVoicePreview) liveVoicePreview.style.display = 'none';
+      }
+    };
+
+    window.VoiceService.onTranscriptChange = (words) => {
+      if (liveVoiceText) liveVoiceText.textContent = words || 'Listening...';
+    };
+
+    window.VoiceService.onError = (errMessage) => {
+      if (micStatusText) micStatusText.textContent = errMessage;
+    };
+
+    btnMic.addEventListener('click', () => {
+      window.VoiceService.toggle();
+    });
+  }
+
+  // 9. Full-Screen Cinematic Response Display (Slice 3)
+  const screenFullscreen = document.getElementById('screen-fullscreen-response');
+  const fullscreenOutcomePill = document.getElementById('fullscreen-outcome-pill');
+  const fullscreenHeadline = document.getElementById('fullscreen-headline');
+  const fullscreenAdviceText = document.getElementById('fullscreen-advice-text');
+  const fullscreenBodyScroll = document.querySelector('.fullscreen-body-scroll');
+  const btnFullscreenDismiss = document.getElementById('btn-fullscreen-dismiss');
+
+  function openFullscreenResponse(result) {
+    if (!screenFullscreen) return;
+
+    const isDoctor = result.outcome === 'see-doctor';
+    if (isDoctor) {
+      fullscreenOutcomePill.className = 'triage-outcome-tag tag-doctor';
+      fullscreenOutcomePill.innerHTML = '⚠️ Professional Evaluation Recommended';
+      fullscreenHeadline.textContent = 'Clinical Physician Referral';
+      if (fullscreenBodyScroll) fullscreenBodyScroll.classList.remove('home-remedy');
+    } else {
+      fullscreenOutcomePill.className = 'triage-outcome-tag tag-home';
+      fullscreenOutcomePill.innerHTML = '🌿 Self-Care Protocol';
+      fullscreenHeadline.textContent = 'Routine At-Home Recovery Care';
+      if (fullscreenBodyScroll) fullscreenBodyScroll.classList.add('home-remedy');
+    }
+
+    fullscreenAdviceText.textContent = result.text;
+    screenFullscreen.style.display = 'flex';
+  }
+
+  function closeFullscreenResponse() {
+    if (screenFullscreen) {
+      screenFullscreen.style.display = 'none';
+    }
+    // Triggers paper-throw save in Slice 4
+    if (window.onTriageSessionClosed && window.currentTriageOutcome) {
+      window.onTriageSessionClosed(window.currentTriageOutcome);
+    }
+  }
+
+  if (btnFullscreenDismiss) {
+    btnFullscreenDismiss.addEventListener('click', closeFullscreenResponse);
+  }
+
+  // Hook triage completion to trigger full-screen presentation
+  window.onTriageResultReady = (result) => {
+    if (result && result.isFinal) {
+      setTimeout(() => {
+        openFullscreenResponse(result);
+      }, 700); // Short dramatic beat after message arrives
+    }
+  };
+
   // Global helper for subsequent slices to jump to app view
   window.MediSenseApp = {
     showScreen,
     applyTheme,
-    appendMessageBubble
+    appendMessageBubble,
+    openFullscreenResponse,
+    closeFullscreenResponse
   };
 });

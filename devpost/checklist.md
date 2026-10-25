@@ -29,7 +29,7 @@ Build mode: learn
   Learner check: Type symptoms like "I have a headache and sore throat" into the chat, answer the follow-up question, and see the advice MediSense gives you.
   Commit: `Implement Gemini AI symptom triage chat engine`
 
-- [ ] **3. Voice recording input (Web Speech API) & full-screen cinematic response**
+- [x] **3. Voice recording input (Web Speech API) & full-screen cinematic response**
   Becomes usable: Tap the microphone button at the bottom center to speak your symptoms with real-time live transcription, and see the final medical suggestion displayed in full-screen cinematic presentation.
   Why now: Delivers the signature voice-first interaction and dramatic diagnosis presentation specified in your scope and PRD.
   PRD ref: `prd.md > Features and Behavior > Triage Conversation`, `prd.md > Features and Behavior > Full-Screen Response`
@@ -61,7 +61,7 @@ Build mode: learn
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — Slice 2 (Testing the core Gemini triage chat loop)
+- [x] Early usable behavior explored — Slice 2 (Testing the core Gemini triage chat loop)
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
