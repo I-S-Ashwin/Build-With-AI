@@ -72,6 +72,10 @@ const HistoryService = {
     // Force reflow then animate
     paper.getBoundingClientRect();
 
+    if (window.AudioEngine) {
+      window.AudioEngine.playWhoosh();
+    }
+
     paper.style.transform = `translate(${targetX - startX}px, ${targetY - startY}px) scale(0.2) rotate(540deg)`;
     paper.style.opacity = '0';
 
@@ -93,6 +97,9 @@ const HistoryService = {
       }
 
       this.renderHistory();
+      if (window.renderWeeklyHeatmap) {
+        window.renderWeeklyHeatmap();
+      }
 
       // Show a toast confirmation
       this.showToast('Consultation archived in Chat Bin!');
@@ -210,6 +217,9 @@ const HistoryService = {
       window.Storage.deleteSession(sessionId);
     }
     this.renderHistory();
+    if (window.renderWeeklyHeatmap) {
+      window.renderWeeklyHeatmap();
+    }
     this.showToast('Consultation removed from Chat Bin.');
   },
 

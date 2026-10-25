@@ -66,6 +66,9 @@ Build mode: learn
 
 ## Final Review
 
+- [x] Add Broadway Boogie-Woogie living grid animations & neo-brutalist visual depth
+- [x] Add Weekly Wellness Heatmap & Energy Level selector to chat workspace
+- [x] Add tactile Web Audio sound effects for UI clicks and paper-throw save
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map

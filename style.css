@@ -1100,3 +1100,140 @@ body {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+/* Broadway Boogie-Woogie Rhythm & Heatmap Bar */
+
+/* Boogie-Woogie Animated Border Ribbon */
+.boogie-ribbon {
+  height: 12px;
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+  border-bottom: 2px solid var(--mondrian-black);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--mondrian-red) 0px,
+    var(--mondrian-red) 24px,
+    var(--mondrian-yellow) 24px,
+    var(--mondrian-yellow) 48px,
+    var(--mondrian-white) 48px,
+    var(--mondrian-white) 72px,
+    var(--mondrian-blue) 72px,
+    var(--mondrian-blue) 96px,
+    var(--mondrian-accent-yellow) 96px,
+    var(--mondrian-accent-yellow) 120px
+  );
+  background-size: 240px 100%;
+  animation: boogieShift 8s linear infinite;
+}
+
+@keyframes boogieShift {
+  from { background-position: 0 0; }
+  to { background-position: 240px 0; }
+}
+
+/* Wellness Dashboard Top Bar */
+.wellness-dashboard-bar {
+  background-color: var(--bg-surface);
+  border-bottom: var(--border-thick);
+  padding: 0.75rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.wellness-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wellness-label {
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Weekly Heatmap Grid (7 Days) */
+.heatmap-tiles-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.heatmap-day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.heatmap-day-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.heatmap-tile {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--mondrian-black);
+  background-color: var(--bg-subtle);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.heatmap-tile:hover {
+  transform: scale(1.15);
+  box-shadow: 2px 2px 0px var(--mondrian-black);
+}
+
+.heatmap-tile.clear { background-color: #E8F5E9; border-color: #2E7D32; }
+.heatmap-tile.home { background-color: var(--mondrian-accent-yellow); }
+.heatmap-tile.doctor { background-color: var(--mondrian-red); }
+.heatmap-tile.today { border-width: 3px; }
+
+/* Energy Level Tags */
+.energy-tags-group {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-energy-tag {
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.35rem 0.65rem;
+  border: 2px solid var(--mondrian-black);
+  background-color: var(--bg-subtle);
+  color: var(--text-main);
+  cursor: pointer;
+  box-shadow: 2px 2px 0px var(--mondrian-black);
+  transition: transform 0.1s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-energy-tag:hover {
+  transform: translate(1px, 1px);
+}
+
+.btn-energy-tag.active {
+  background-color: var(--mondrian-red);
+  color: white;
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.btn-energy-tag.active[data-energy="moderate"] {
+  background-color: var(--mondrian-accent-yellow);
+  color: var(--mondrian-black);
+}
+
+.btn-energy-tag.active[data-energy="fatigued"] {
+  background-color: var(--mondrian-blue);
+  color: white;
+}

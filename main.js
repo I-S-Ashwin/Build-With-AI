@@ -35,38 +35,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 2. Web Audio Harmonic Chime for Cinematic Opening
-  function playCinematicChime() {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
+  // 2. Web Audio Sound Engine (Chime, Tactile Clicks, & Whoosh)
+  const AudioEngine = {
+    ctx: null,
+    getCtx() {
+      if (!this.ctx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) this.ctx = new AudioContext();
+      }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+      return this.ctx;
+    },
 
-      // Triad Chime: C5 (523Hz), E5 (659Hz), G5 (784Hz) with warm decay
-      const freqs = [523.25, 659.25, 783.99];
-      const now = ctx.currentTime;
-
-      freqs.forEach((freq, idx) => {
+    playClick() {
+      try {
+        const ctx = this.getCtx();
+        if (!ctx) return;
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
-
-        gain.gain.setValueAtTime(0.001, now + idx * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.12 + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.12 + 1.2);
-
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
         osc.connect(gain);
         gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.045);
+      } catch (e) {}
+    },
 
-        osc.start(now + idx * 0.12);
-        osc.stop(now + idx * 0.12 + 1.3);
-      });
-    } catch (e) {
-      console.warn('Audio chime autoplay restricted by browser policy; user interaction will enable sound.');
+    playWhoosh() {
+      try {
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(350, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.25);
+        osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.55);
+        gain.gain.setValueAtTime(0.01, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.56);
+      } catch (e) {}
+    },
+
+    playChime() {
+      try {
+        const ctx = this.getCtx();
+        if (!ctx) return;
+        const freqs = [523.25, 659.25, 783.99];
+        const now = ctx.currentTime;
+        freqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.001, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + idx * 0.12 + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.12 + 1.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 1.3);
+        });
+      } catch (e) {}
     }
-  }
+  };
+
+  window.AudioEngine = AudioEngine;
+
+  // Attach tactile sound to interactive elements
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.btn, .symptom-chip, .btn-energy-tag, .btn-mic')) {
+      AudioEngine.playClick();
+    }
+  });
 
   // 3. Screen Router
   function showScreen(targetScreen) {
@@ -79,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 4. Opening Drop Intro Timing (2 Seconds)
-  playCinematicChime();
+  AudioEngine.playChime();
   setTimeout(() => {
     // If user already exists in storage, we can still show preview or route
     const user = window.Storage ? window.Storage.getUser() : null;
@@ -348,6 +399,79 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 700); // Short dramatic beat after message arrives
     }
   };
+
+  // 10. Weekly Heatmap & Energy Selector Engine
+  const heatmapRow = document.getElementById('wellness-heatmap-row');
+  const energyButtons = document.querySelectorAll('.btn-energy-tag');
+
+  function renderWeeklyHeatmap() {
+    if (!heatmapRow) return;
+    heatmapRow.innerHTML = '';
+
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const todayIndex = (new Date().getDay() + 6) % 7; // Convert Sun=0 to Mon=0
+    const sessions = window.Storage ? window.Storage.getSessions() : [];
+
+    dayNames.forEach((name, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'heatmap-day-cell';
+
+      const label = document.createElement('span');
+      label.className = 'heatmap-day-label';
+      label.textContent = name;
+
+      const tile = document.createElement('div');
+      tile.className = 'heatmap-tile';
+      if (idx === todayIndex) {
+        tile.classList.add('today');
+      }
+
+      // Check if session exists on this day of current week
+      if (idx === todayIndex && sessions.length > 0) {
+        const latest = sessions[0];
+        if (latest.outcome === 'see-doctor') {
+          tile.classList.add('doctor');
+          tile.title = `Today: ${latest.summary} (Doctor Advised)`;
+        } else {
+          tile.classList.add('home');
+          tile.title = `Today: ${latest.summary} (Home Care)`;
+        }
+      } else if (idx < todayIndex) {
+        tile.classList.add('clear');
+        tile.title = `${name}: Symptom Free`;
+      } else {
+        tile.title = `${name}: Upcoming`;
+      }
+
+      cell.appendChild(label);
+      cell.appendChild(tile);
+      heatmapRow.appendChild(cell);
+    });
+  }
+
+  // Energy Level selection
+  energyButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      energyButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const level = btn.getAttribute('data-energy');
+      localStorage.setItem('medisense_energy', level);
+    });
+  });
+
+  // Restore saved energy
+  const savedEnergy = localStorage.getItem('medisense_energy');
+  if (savedEnergy) {
+    energyButtons.forEach(btn => {
+      if (btn.getAttribute('data-energy') === savedEnergy) {
+        energyButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    });
+  }
+
+  renderWeeklyHeatmap();
+  window.renderWeeklyHeatmap = renderWeeklyHeatmap;
 
   // Global helper for subsequent slices to jump to app view
   window.MediSenseApp = {
