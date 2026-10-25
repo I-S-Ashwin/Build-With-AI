@@ -898,3 +898,22 @@ body {
   padding-top: 2rem;
   margin-top: 1rem;
 }
+/* Symptom Quick Chips */
+.symptom-chip {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border: var(--border-thin);
+  border-bottom: 2px solid var(--mondrian-black);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px var(--mondrian-black);
+  transition: transform 0.1s ease;
+}
+
+.symptom-chip:hover {
+  transform: translate(1px, 1px);
+  background-color: var(--mondrian-accent-yellow);
+  color: var(--mondrian-black);
+}

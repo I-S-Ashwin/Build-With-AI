@@ -146,10 +146,24 @@
           <!-- Dynamic conversation bubbles will append here in Slice 2 -->
         </div>
 
-        <!-- Live Voice Speech Transcript Preview Banner -->
+        <!-- Live Voice Speech Transcript Preview Banner with Sound Meter -->
         <div id="live-voice-preview" class="voice-transcript-banner" style="display: none;">
           <span class="live-dot"></span>
-          <span id="live-voice-text">Listening...</span>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+            <span id="live-voice-text">Listening... Speak clearly</span>
+            <!-- Live hardware sound level bar -->
+            <div style="height: 6px; width: 100%; max-width: 240px; background: rgba(0,0,0,0.15); border: 1px solid var(--mondrian-black);">
+              <div id="mic-volume-bar" style="height: 100%; width: 5%; background: var(--mondrian-red); transition: width 0.08s ease;"></div>
+            </div>
+          </div>
+          <button type="button" onclick="window.VoiceService.stop(true)" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Done Speaking &rarr;</button>
+        </div>
+
+        <!-- Quick Sample Symptom Chips for Instant Testing -->
+        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; padding: 0.5rem 1rem 0; max-width: 760px; width: 100%;">
+          <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I have a cold with a mild cough and runny nose'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">🤒 Routine Cold</button>
+          <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I got a minor scratch on my arm while playing basketball'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">🩹 Minor Scratch</button>
+          <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I have been sweating quite a lot and feeling very unwell with chest pressure'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">⚠️ Sweating &amp; Chest Pain</button>
         </div>
 
         <!-- Chat Input Bar (Bottom Center Focused) -->
