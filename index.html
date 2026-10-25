@@ -190,8 +190,11 @@
       <!-- Right Sidebar: Chat History Bin -->
       <aside class="history-sidebar">
         <div class="sidebar-header">
-          <h3>Chat Bin &amp; History</h3>
-          <span id="session-count-badge" style="font-size: 0.8rem; font-weight: 800; background: var(--mondrian-black); color: white; padding: 2px 8px;">0</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h3>Chat Bin</h3>
+            <span id="session-count-badge" style="font-size: 0.8rem; font-weight: 800; background: var(--mondrian-black); color: white; padding: 2px 8px;">0</span>
+          </div>
+          <button type="button" onclick="location.reload()" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Start fresh consultation">+ New</button>
         </div>
         <div id="history-sessions-list" class="history-bin-list">
           <div class="history-empty-notice">
@@ -239,6 +242,30 @@
     </div>
   </section>
 
+  <!-- Session Details Modal -->
+  <div id="modal-session-details" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 600px;">
+      <div class="login-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div class="brand-mark">
+          <div class="mini-mondrian">
+            <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+          </div>
+          <h2 style="font-size: 1.4rem;">Consultation Record</h2>
+        </div>
+        <button type="button" onclick="document.getElementById('modal-session-details').classList.remove('active')" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;">&times;</button>
+      </div>
+
+      <div id="session-details-content">
+        <!-- Injected dynamically by HistoryService -->
+      </div>
+
+      <div class="form-actions" style="margin-top: 1rem;">
+        <button type="button" onclick="document.getElementById('modal-session-details').classList.remove('active')" class="btn btn-secondary">Close</button>
+        <button type="button" id="btn-details-export-pdf" class="btn btn-primary">Download PDF &darr;</button>
+      </div>
+    </div>
+  </div>
+
   <!-- API Key Settings Modal -->
   <div id="modal-api-key" class="modal-backdrop">
     <div class="modal-dialog">
@@ -268,6 +295,7 @@
   <script src="storage.js"></script>
   <script src="gemini.js"></script>
   <script src="voice.js"></script>
+  <script src="history.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

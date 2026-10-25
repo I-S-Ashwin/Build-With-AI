@@ -39,7 +39,7 @@ Build mode: learn
   Learner check: Click the mic button, speak a sentence, watch the words appear on screen, and see the full-screen response appear when triage finishes.
   Commit: `Add voice recognition and full-screen response reveal`
 
-- [ ] **4. Paper-throw save animation, chat history bin, and PDF export**
+- [x] **4. Paper-throw save animation, chat history bin, and PDF export**
   Becomes usable: Dismissing a triage response animates the session into the history bin, stores the session in localStorage, lets you browse past conversations, and exports any session as a formatted PDF.
   Why now: Closes the session lifecycle and delivers the user's requirement to save and review past colds and scratches.
   PRD ref: `prd.md > Features and Behavior > Session Save — Paper Throw Animation`, `prd.md > Features and Behavior > Chat History`, `prd.md > Features and Behavior > Export / PDF`
