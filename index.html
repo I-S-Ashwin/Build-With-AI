@@ -120,6 +120,7 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-api-key" class="btn btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.85rem;" title="Configure Gemini API Key">🔑 API Key</button>
         <button id="btn-tutorial-replay" class="btn btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.85rem;" title="Play Tutorial">💡 Tour</button>
         <button class="btn btn-theme-toggle theme-toggle-btn" aria-label="Toggle theme">🌙 Dark</button>
         <button id="btn-logout" class="btn btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.85rem;">Switch User</button>
@@ -181,8 +182,34 @@
     </div>
   </section>
 
+  <!-- API Key Settings Modal -->
+  <div id="modal-api-key" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="login-header">
+        <div class="mini-mondrian" style="margin-bottom: 0.5rem;">
+          <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+        </div>
+        <h2>Google Gemini AI Key</h2>
+        <p>Optional: Connect your free Gemini API key to activate live generative triage. If omitted, MediSense runs on local triage heuristics.</p>
+      </div>
+      <div class="form-group">
+        <label for="input-gemini-key">Gemini API Key</label>
+        <input type="password" id="input-gemini-key" class="input-text" placeholder="AIzaSy..." autocomplete="off">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+          Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--mondrian-blue); font-weight: 700;">Google AI Studio</a>. Saved only in your browser.
+        </p>
+      </div>
+      <div class="form-actions">
+        <button type="button" id="btn-close-api-key" class="btn btn-secondary">Close</button>
+        <button type="button" id="btn-save-api-key" class="btn btn-primary">Save Key</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
+  <script src="config.js"></script>
   <script src="storage.js"></script>
+  <script src="gemini.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

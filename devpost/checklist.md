@@ -19,7 +19,7 @@ Build mode: learn
   Learner check: Open the app in Chrome, watch the opening animation, enter your name to log in, and click the theme toggle to test light and dark mode.
   Commit: `Add Mondrian shell, opening animation, preview, and login`
 
-- [ ] **2. Interactive triage conversation & Google Gemini AI integration**
+- [x] **2. Interactive triage conversation & Google Gemini AI integration**
   Becomes usable: Type symptoms into the chat, receive one wanderer follow-up question at a time from Gemini AI, and get a clear home-remedy suggestion or "see a doctor" referral.
   Why now: Risk and kernel first. Proves the core AI triage conversation works before adding voice and complex animations.
   PRD ref: `prd.md > Features and Behavior > Triage Conversation`, `prd.md > States and Boundaries`

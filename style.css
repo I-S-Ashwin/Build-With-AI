@@ -659,3 +659,137 @@ body {
   .app-layout-grid { grid-template-columns: 1fr; }
   .history-sidebar { display: none; }
 }
+/* Message Bubbles & Triage Thread */
+.chat-msg {
+  max-width: 82%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  animation: messageSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes messageSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-msg.user {
+  align-self: flex-end;
+}
+
+.chat-msg.assistant {
+  align-self: flex-start;
+}
+
+.msg-author {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.chat-msg.user .msg-author {
+  justify-content: flex-end;
+}
+
+.msg-body {
+  padding: 1.15rem 1.4rem;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  border: var(--border-medium);
+  box-shadow: var(--shadow-block);
+}
+
+.chat-msg.user .msg-body {
+  background-color: var(--mondrian-yellow);
+  color: var(--mondrian-black);
+  border-color: var(--mondrian-black);
+}
+
+.chat-msg.assistant .msg-body {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border-left: 8px solid var(--mondrian-blue);
+}
+
+/* Triage Outcome Banners */
+.triage-outcome-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 0.8rem;
+  margin-bottom: 0.6rem;
+  border: 2px solid var(--mondrian-black);
+}
+
+.tag-doctor {
+  background-color: var(--mondrian-red);
+  color: white;
+}
+
+.tag-home {
+  background-color: var(--mondrian-yellow);
+  color: var(--mondrian-black);
+}
+
+/* Typing Indicator Animation */
+.typing-indicator {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.85rem 1.25rem;
+  background-color: var(--bg-surface);
+  border: var(--border-medium);
+  box-shadow: var(--shadow-block);
+  width: fit-content;
+}
+
+.typing-dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--mondrian-black);
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) { background-color: var(--mondrian-red); animation-delay: 0s; }
+.typing-dot:nth-child(2) { background-color: var(--mondrian-accent-yellow); animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { background-color: var(--mondrian-blue); animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+}
+
+/* API Key Modal */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.modal-backdrop.active {
+  display: flex;
+}
+
+.modal-dialog {
+  background-color: var(--bg-surface);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-block-lg);
+  max-width: 520px;
+  width: 100%;
+  padding: 2rem;
+}
