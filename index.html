@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediSense — Personal Healthcare Triage</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- html2pdf for PDF export in Slice 4 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <!-- Screen 1: Cinematic Opening Drop (2 Seconds) -->
+  <section id="screen-opening" class="screen active">
+    <div class="opening-stage">
+      <div class="mondrian-composition-logo" aria-label="MediSense Logo">
+        <div class="block-red"></div>
+        <div class="block-yellow"></div>
+        <div class="block-white"></div>
+        <div class="block-blue"></div>
+      </div>
+      <h1 class="opening-title">Medi<span>Sense</span></h1>
+      <p class="opening-subtitle">Intelligent Healthcare Triage</p>
+    </div>
+  </section>
+
+  <!-- Screen 2: Preview / Landing Page -->
+  <section id="screen-preview" class="screen">
+    <header class="preview-nav">
+      <div class="brand-mark">
+        <div class="mini-mondrian">
+          <div class="r"></div>
+          <div class="y"></div>
+          <div class="w"></div>
+          <div class="b"></div>
+        </div>
+        <span class="brand-title">MediSense</span>
+      </div>
+      <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <button class="btn btn-theme-toggle theme-toggle-btn" aria-label="Toggle theme">🌙 Dark</button>
+        <button id="btn-preview-login" class="btn btn-primary">Log In &rarr;</button>
+      </div>
+    </header>
+
+    <main class="preview-hero">
+      <div class="hero-text">
+        <h1>Personal triage for <em>routine</em> health issues.</h1>
+        <p>
+          Skip the clinic waiting room for familiar colds, minor scrapes, and routine ailments. 
+          MediSense listens to your symptoms, asks careful follow-ups, and tells you whether to treat at home or see a doctor immediately.
+        </p>
+        <button onclick="document.getElementById('btn-preview-login').click()" class="btn btn-primary" style="font-size: 1.15rem; padding: 1rem 2.25rem;">
+          Start Consultation
+        </button>
+      </div>
+
+      <div class="preview-card-grid">
+        <div class="grid-cell">
+          <span class="cell-pill pill-red">Voice First</span>
+          <h3>Speak Naturally</h3>
+          <p>Tap the mic and describe how you feel in your own words, just like talking to a friend.</p>
+        </div>
+        <div class="grid-cell">
+          <span class="cell-pill pill-yellow">Adaptive</span>
+          <h3>Wanderer Q&amp;A</h3>
+          <p>Carefully asks one follow-up question at a time to gather relevant medical context.</p>
+        </div>
+        <div class="grid-cell">
+          <span class="cell-pill pill-blue">Safety Filter</span>
+          <h3>Clear Directives</h3>
+          <p>Instantly flags potential emergencies with an unambiguous alert to see a physician.</p>
+        </div>
+        <div class="grid-cell">
+          <span class="cell-pill pill-black">Offline Store</span>
+          <h3>Private History</h3>
+          <p>Sessions remain strictly on your machine, with clean PDF export available at any time.</p>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- Screen 3: Login Modal / Screen -->
+  <section id="screen-login" class="screen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="mini-mondrian" style="margin-bottom: 0.75rem;">
+          <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+        </div>
+        <h2>Welcome to MediSense</h2>
+        <p>Enter your profile name to access your local triage workspace.</p>
+      </div>
+      <form id="form-login">
+        <div class="form-group">
+          <label for="input-username">Username or Patient Name</label>
+          <input type="text" id="input-username" class="input-text" placeholder="e.g. Alex" required autocomplete="off">
+        </div>
+        <div class="form-actions">
+          <button type="button" id="btn-login-back" class="btn btn-secondary">&larr; Back</button>
+          <button type="submit" class="btn btn-primary">Enter MediSense</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Screen 4: Main Application & Chat Shell -->
+  <section id="screen-app" class="screen">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="app-title-group">
+          <div class="mini-mondrian">
+            <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+          </div>
+          <span class="brand-title">MediSense</span>
+        </div>
+        <div class="user-badge">
+          <span>Patient:</span>
+          <strong id="user-display-name">Patient</strong>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-tutorial-replay" class="btn btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.85rem;" title="Play Tutorial">💡 Tour</button>
+        <button class="btn btn-theme-toggle theme-toggle-btn" aria-label="Toggle theme">🌙 Dark</button>
+        <button id="btn-logout" class="btn btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.85rem;">Switch User</button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <div class="app-layout-grid">
+      <!-- Chat Workspace Area -->
+      <main class="chat-workspace">
+        <!-- Message stream -->
+        <div id="chat-messages-container" class="conversation-scroll-area">
+          <div id="chat-empty-notice" class="empty-chat-state">
+            <div class="mondrian-icon">
+              <div></div><div></div><div></div><div></div>
+            </div>
+            <h3>How are you feeling today?</h3>
+            <p>
+              Tap the <strong>red microphone</strong> below to speak your symptoms, or type in the box. 
+              MediSense will ask a few guided questions before providing a calm suggestion or doctor recommendation.
+            </p>
+          </div>
+          <!-- Dynamic conversation bubbles will append here in Slice 2 -->
+        </div>
+
+        <!-- Chat Input Bar (Bottom Center Focused) -->
+        <div class="chat-input-bar">
+          <div class="voice-control-center">
+            <button id="btn-mic-record" class="btn-mic" aria-label="Start Voice Recording" title="Tap to speak your symptoms">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+          <span id="mic-status-text" class="mic-status-label">Tap microphone to speak symptoms</span>
+
+          <form id="form-chat-text" class="text-fallback-row">
+            <input type="text" id="input-symptoms-text" placeholder="Or type what's happening (e.g. I have a cold and mild headache)..." autocomplete="off">
+            <button type="submit" class="btn btn-secondary" style="padding: 0.75rem 1.25rem;">Send</button>
+          </form>
+        </div>
+      </main>
+
+      <!-- Right Sidebar: Chat History Bin -->
+      <aside class="history-sidebar">
+        <div class="sidebar-header">
+          <h3>Chat Bin &amp; History</h3>
+          <span id="session-count-badge" style="font-size: 0.8rem; font-weight: 800; background: var(--mondrian-black); color: white; padding: 2px 8px;">0</span>
+        </div>
+        <div id="history-sessions-list" class="history-bin-list">
+          <div class="history-empty-notice">
+            No saved consultations yet. Completed triage sessions will be archived here.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <script src="storage.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Personal learning context — kept out of commits by default
+devpost/learner-profile.md
+
+# Environment variables — keep secrets out of version control
+.env
+.env.*
+# Allow a secret-free example
+!.env.example
+config.js
