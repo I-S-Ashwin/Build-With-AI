@@ -286,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.VoiceService.onTranscriptChange = (words) => {
       if (liveVoiceText) liveVoiceText.textContent = words || 'Listening...';
+      if (inputSymptoms) inputSymptoms.value = words || '';
     };
 
     window.VoiceService.onError = (errMessage) => {
