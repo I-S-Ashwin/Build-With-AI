@@ -216,6 +216,71 @@ document.addEventListener('DOMContentLoaded', () => {
   const messagesContainer = document.getElementById('chat-messages-container');
   const emptyNotice = document.getElementById('chat-empty-notice');
 
+  // Markdown formatting helper (converts **bold**, lists, and headers to styled HTML)
+  function renderFormattedMarkdown(text) {
+    if (!text) return '';
+
+    // 1. Escape HTML
+    let safe = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    // 2. Bold: **text** or __text__
+    safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    safe = safe.replace(/__(.*?)__/g, '<strong>$1</strong>');
+
+    // 3. Italics: *text* or _text_
+    safe = safe.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    safe = safe.replace(/_([^_]+)_/g, '<em>$1</em>');
+
+    // 4. Line by line parsing for paragraphs and bullet lists
+    const lines = safe.split('\n');
+    const processed = [];
+    let inList = false;
+
+    lines.forEach(rawLine => {
+      const line = rawLine.trim();
+      if (!line) {
+        if (inList) {
+          processed.push('</ul>');
+          inList = false;
+        }
+        return;
+      }
+
+      if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
+        const itemText = line.replace(/^[•\-\*]\s*/, '');
+        if (!inList) {
+          processed.push('<ul class="formatted-list">');
+          inList = true;
+        }
+        processed.push(`<li>${itemText}</li>`);
+      } else {
+        if (inList) {
+          processed.push('</ul>');
+          inList = false;
+        }
+        if (line.startsWith('### ')) {
+          processed.push(`<h4 class="formatted-h4">${line.slice(4)}</h4>`);
+        } else if (line.startsWith('## ')) {
+          processed.push(`<h3 class="formatted-h3">${line.slice(3)}</h3>`);
+        } else {
+          processed.push(`<p class="formatted-p">${line}</p>`);
+        }
+      }
+    });
+
+    if (inList) {
+      processed.push('</ul>');
+    }
+
+    return processed.join('');
+  }
+  window.renderFormattedMarkdown = renderFormattedMarkdown;
+
   function appendMessageBubble(role, text, outcome = null) {
     if (emptyNotice) {
       emptyNotice.style.display = 'none';
@@ -247,9 +312,16 @@ document.addEventListener('DOMContentLoaded', () => {
       bodyDiv.appendChild(tag);
     }
 
-    const textP = document.createElement('p');
-    textP.textContent = text;
-    bodyDiv.appendChild(textP);
+    if (role === 'user') {
+      const textP = document.createElement('p');
+      textP.textContent = text;
+      bodyDiv.appendChild(textP);
+    } else {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'msg-formatted-content';
+      contentDiv.innerHTML = renderFormattedMarkdown(text);
+      bodyDiv.appendChild(contentDiv);
+    }
 
     msgDiv.appendChild(authorDiv);
     msgDiv.appendChild(bodyDiv);
@@ -468,7 +540,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fullscreenBodyScroll) fullscreenBodyScroll.classList.add('home-remedy');
     }
 
-    fullscreenAdviceText.textContent = result.text;
+    if (fullscreenAdviceText) {
+      fullscreenAdviceText.innerHTML = renderFormattedMarkdown(result.text);
+    }
     screenFullscreen.style.display = 'flex';
   }
 

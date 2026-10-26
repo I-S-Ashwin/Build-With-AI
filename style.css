@@ -2209,3 +2209,63 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FORMATTED MARKDOWN & STRUCTURED CLINICAL TEXT STYLING
+   ═══════════════════════════════════════════════════════════════ */
+
+.msg-formatted-content {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+.msg-formatted-content strong,
+.fullscreen-body-scroll strong,
+#session-details-content strong {
+  font-weight: 850;
+  color: var(--text-main);
+}
+
+.msg-formatted-content .formatted-p,
+.fullscreen-body-scroll .formatted-p {
+  margin: 0 0 0.75rem;
+  line-height: 1.6;
+}
+
+.msg-formatted-content .formatted-p:last-child,
+.fullscreen-body-scroll .formatted-p:last-child {
+  margin-bottom: 0;
+}
+
+.msg-formatted-content .formatted-list,
+.fullscreen-body-scroll .formatted-list,
+#session-details-content .formatted-list {
+  margin: 0.45rem 0 0.95rem;
+  padding-left: 1.5rem;
+  line-height: 1.6;
+  list-style-type: disc;
+}
+
+.msg-formatted-content .formatted-list li,
+.fullscreen-body-scroll .formatted-list li,
+#session-details-content .formatted-list li {
+  margin-bottom: 0.4rem;
+  padding-left: 0.2rem;
+}
+
+.msg-formatted-content .formatted-h3,
+.fullscreen-body-scroll .formatted-h3 {
+  font-size: 1.18rem;
+  font-weight: 900;
+  margin: 0.95rem 0 0.35rem;
+  letter-spacing: -0.3px;
+}
+
+.msg-formatted-content .formatted-h4,
+.fullscreen-body-scroll .formatted-h4 {
+  font-size: 1.08rem;
+  font-weight: 850;
+  margin: 0.75rem 0 0.3rem;
+}

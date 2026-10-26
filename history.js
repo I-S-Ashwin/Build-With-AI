@@ -170,7 +170,7 @@ const HistoryService = {
       msgsHtml += `
         <div style="margin-bottom: 0.75rem; padding: 0.6rem 0.85rem; border: 2px solid var(--mondrian-black); background: ${isUser ? 'var(--mondrian-yellow)' : 'var(--bg-subtle)'};">
           <strong style="text-transform: uppercase; font-size: 0.75rem;">${isUser ? 'Patient' : 'MediSense'}:</strong>
-          <p style="margin-top: 0.2rem; font-size: 0.95rem; line-height: 1.4;">${this.escapeHtml(m.text)}</p>
+          <div style="margin-top: 0.2rem; font-size: 0.95rem; line-height: 1.4;">${isUser ? `<p style="margin:0;">${this.escapeHtml(m.text)}</p>` : (window.renderFormattedMarkdown ? window.renderFormattedMarkdown(m.text) : this.escapeHtml(m.text))}</div>
         </div>
       `;
     });
@@ -190,7 +190,7 @@ const HistoryService = {
 
       <div style="padding: 1rem; border-left: 6px solid ${isDoctor ? 'var(--mondrian-red)' : 'var(--mondrian-accent-yellow)'}; background: var(--bg-surface); margin-bottom: 1rem;">
         <strong style="text-transform: uppercase; font-size: 0.8rem;">Outcome Assessment:</strong>
-        <p style="font-size: 0.95rem; margin-top: 0.3rem;">${this.escapeHtml(session.outcomeText || 'Consultation archived.')}</p>
+        <div style="font-size: 0.95rem; margin-top: 0.3rem;">${window.renderFormattedMarkdown ? window.renderFormattedMarkdown(session.outcomeText || 'Consultation archived.') : this.escapeHtml(session.outcomeText || 'Consultation archived.')}</div>
       </div>
     `;
 
@@ -257,7 +257,7 @@ const HistoryService = {
       conversationRows += `
         <div style="margin-bottom: 12px; padding: 10px 14px; border: 2px solid #111; background-color: ${isUser ? '#FFF8E1' : '#F4F6F8'};">
           <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #555;">${isUser ? patientName : 'MediSense Assistant'}</div>
-          <div style="font-size: 14px; margin-top: 4px; line-height: 1.4;">${this.escapeHtml(m.text)}</div>
+          <div style="font-size: 14px; margin-top: 4px; line-height: 1.4;">${isUser ? this.escapeHtml(m.text) : (window.renderFormattedMarkdown ? window.renderFormattedMarkdown(m.text) : this.escapeHtml(m.text))}</div>
         </div>
       `;
     });
@@ -287,7 +287,7 @@ const HistoryService = {
           ${isDoctor ? '⚠️ Clinical Recommendation — Physician Evaluation Advised' : '🌿 Routine Care Protocol — Home Treatment Suggested'}
         </div>
         <div style="font-size: 16px; font-weight: bold; margin-top: 6px;">${this.escapeHtml(session.summary)}</div>
-        <p style="font-size: 14px; line-height: 1.5; margin-top: 8px; margin-bottom: 0;">${this.escapeHtml(session.outcomeText)}</p>
+        <div style="font-size: 14px; line-height: 1.5; margin-top: 8px; margin-bottom: 0;">${window.renderFormattedMarkdown ? window.renderFormattedMarkdown(session.outcomeText) : this.escapeHtml(session.outcomeText)}</div>
       </div>
 
       <div style="margin-bottom: 20px;">
