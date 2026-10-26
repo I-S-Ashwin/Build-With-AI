@@ -962,7 +962,10 @@ const MEDISENSE_KB = [
   }
 ];
 
-// Export for use in gemini.js
+// Export for browser window and Node modules
+if (typeof window !== 'undefined') {
+  window.MEDISENSE_KB = MEDISENSE_KB;
+}
 if (typeof module !== 'undefined') {
   module.exports = { MEDISENSE_KB };
 }

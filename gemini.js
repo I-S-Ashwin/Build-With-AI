@@ -123,120 +123,31 @@ GUIDELINES:
     return this.parseResponseMetadata(botResponse);
   },
 
-  // ─── Knowledge-Base Powered Local Triage (116 diseases from Kaggle dataset) ───
+  // ─── Advanced Clinical NLP & Context Dialogue State Machine ───
   localTriageFallback(userMessage, hadApiError = false) {
-    const fullConversation = this.history.map(m => m.text).join(' ').toLowerCase();
     const kb = (typeof MEDISENSE_KB !== 'undefined') ? MEDISENSE_KB : [];
     const profile = window.Storage ? window.Storage.getProfile() : null;
-    const knownConditions = (profile && profile.conditions) ? profile.conditions.map(c => c.toLowerCase()) : [];
 
-    // ── Emergency override: always escalate for these triggers ──
-    const emergencyTriggers = [
-      'chest pain', 'heart attack', 'stroke', 'collapse', 'vomiting blood',
-      'coughing blood', 'blood in stool', 'seizure', 'unconscious', 'can\'t breathe',
-      'not breathing', 'shortness of breath severe', 'severe bleeding', 'anaphylaxis',
-      'blue lips', 'cholera', 'sepsis', 'appendicitis', 'tetanus', 'rabies', 'ebola'
-    ];
-    const isEmergency = emergencyTriggers.some(t => fullConversation.includes(t));
-    if (isEmergency) {
-      const reply = `[DIAGNOSIS_DOCTOR] ⚠️ EMERGENCY: What you've described could be a life-threatening emergency. Please call emergency services (911 or 112) immediately or have someone take you to the nearest emergency room right now. Do not wait.`;
-      this.history.push({ role: 'model', text: reply });
-      return this.parseResponseMetadata(reply);
+    if (window.ClinicalNLP && window.DifferentialEngine && window.DialogueManager) {
+      // 1. Clinical Context & Negation Parsing (detects "no fever", durations, severities)
+      const parsedContext = window.ClinicalNLP.parseContext(this.history, profile);
+
+      // 2. Multi-Factor Differential Computation
+      const differential = window.DifferentialEngine.compute(parsedContext, kb);
+
+      // 3. Empathetic Dialogue State Tracking & Clinical Response Generation
+      const generated = window.DialogueManager.generate(parsedContext, differential, this.questionCount);
+
+      this.history.push({ role: 'model', text: generated.text });
+      if (hadApiError) console.info('Clinical NLP Engine handled fallback response.');
+
+      return this.parseResponseMetadata(generated.text);
     }
 
-    // ── Score each condition in the knowledge base ──
-    const scores = kb.map(condition => {
-      let score = 0;
-      const text = fullConversation;
-
-      // Keyword matching (primary signal)
-      condition.keywords.forEach(kw => {
-        if (text.includes(kw.toLowerCase())) score += 3;
-      });
-
-      // Boost score if condition matches patient's diagnosed chronic conditions
-      if (knownConditions.some(kc => condition.name.toLowerCase().includes(kc) || kc.includes(condition.name.toLowerCase()))) {
-        score += 2;
-      }
-
-      // Symptom signals from conversation
-      if (condition.symptoms.fever && (text.includes('fever') || text.includes('temperature') || text.includes('hot'))) score += 2;
-      if (condition.symptoms.cough && (text.includes('cough') || text.includes('coughing'))) score += 2;
-      if (condition.symptoms.fatigue && (text.includes('tired') || text.includes('fatigue') || text.includes('exhausted') || text.includes('weak'))) score += 2;
-      if (condition.symptoms.breathingDifficulty && (text.includes('breath') || text.includes('wheez') || text.includes('breathing'))) score += 2;
-
-      return { condition, score };
-    });
-
-    // Sort by score, best match first
-    scores.sort((a, b) => b.score - a.score);
-    const best = scores[0];
-    const hasMatch = best && best.score >= 3;
-
-    // ── First message: ask one follow-up question ──
-    if (this.questionCount === 1) {
-      if (hasMatch) {
-        const c = best.condition;
-        // Pick a smart follow-up based on what we already know
-        const followUps = {
-          respiratory: `How long have you had these symptoms, and is there any fever or difficulty breathing?`,
-          cardiovascular: `Is the discomfort constant or does it come and go? Any sweating, dizziness, or pain spreading to your arm or jaw?`,
-          digestive: `Are you experiencing any nausea, vomiting, or changes in your bowel movements?`,
-          neurological: `Is this a new symptom or something that's been happening before? Any visual disturbances or weakness?`,
-          musculoskeletal: `Is the pain localised to one area, and does it worsen with movement? Any recent injury?`,
-          dermatological: `Is the rash spreading, and is there any itching, pain, or associated fever?`,
-          mental_health: `How long have you felt this way, and is it affecting your daily life or sleep?`,
-          metabolic: `Do you have a history of diabetes or thyroid conditions? When did these symptoms start?`,
-          urological: `Is there any pain or burning when you urinate, or any blood in your urine?`,
-          infectious: `Have you been in contact with anyone ill, or recently travelled to a different region?`,
-          default: `How long have you been experiencing this, and has it been getting worse over time?`
-        };
-        const question = followUps[c.category] || followUps.default;
-        const reply = `Based on what you've shared, this could be related to **${c.name}**. To give you better guidance — ${question}`;
-        this.history.push({ role: 'model', text: reply });
-        if (hadApiError) console.info('Local KB triage: first exchange.');
-        return this.parseResponseMetadata(reply);
-      } else {
-        const reply = `Thank you for sharing that with me. To understand what's happening better: how long have you felt this way, and has it been getting steadily worse?`;
-        this.history.push({ role: 'model', text: reply });
-        return this.parseResponseMetadata(reply);
-      }
-    }
-
-    // ── Second message: deliver the diagnosis ──
-    if (hasMatch) {
-      const c = best.condition;
-      const isHighUrgency = ['high', 'emergency'].includes(c.urgency);
-      const isMedUrgency = c.urgency === 'moderate';
-
-      // Format red flags list
-      const redFlagsList = c.redFlags.slice(0, 3).map(f => `• ${f}`).join('\n');
-
-      let prefix, urgencyNote;
-      if (c.urgency === 'emergency') {
-        prefix = '[DIAGNOSIS_DOCTOR]';
-        urgencyNote = `🚨 **This requires emergency care.** Please call 911/112 or go to the ER immediately.`;
-      } else if (isHighUrgency) {
-        prefix = '[DIAGNOSIS_DOCTOR]';
-        urgencyNote = `⚕️ **Please see a doctor soon** — ideally within 24 hours.`;
-      } else if (isMedUrgency) {
-        prefix = '[DIAGNOSIS_DOCTOR]';
-        urgencyNote = `👨‍⚕️ **Consider seeing a doctor** if symptoms persist or worsen.`;
-      } else {
-        prefix = '[DIAGNOSIS_HOME]';
-        urgencyNote = `✅ **This can likely be managed at home**, but monitor closely.`;
-      }
-
-      const reply = `${prefix} Based on your symptoms, this appears consistent with **${c.name}**.\n\n${urgencyNote}\n\n**What to do:** ${c.advice}\n\n**Watch out for (see a doctor if any appear):**\n${redFlagsList}`;
-      this.history.push({ role: 'model', text: reply });
-      if (hadApiError) console.info('Local KB triage: diagnosis delivered.');
-      return this.parseResponseMetadata(reply);
-    }
-
-    // ── Fallback if nothing matched ──
-    const reply = `[DIAGNOSIS_DOCTOR] Based on what you've described, I wasn't able to confidently match this to a specific condition in my local knowledge base. For your safety, please consult a healthcare professional or local clinic who can properly evaluate your symptoms.`;
-    this.history.push({ role: 'model', text: reply });
-    return this.parseResponseMetadata(reply);
+    // Direct fallback if NLP modules are still loading
+    const fallbackText = `Thank you for sharing your symptoms. To help evaluate this safely, how long have you felt this way, and has it been getting worse?`;
+    this.history.push({ role: 'model', text: fallbackText });
+    return this.parseResponseMetadata(fallbackText);
   },
 
   parseResponseMetadata(rawText) {
