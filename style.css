@@ -2737,3 +2737,439 @@ body {
   color: white !important;
   box-shadow: 1px 1px 0 var(--boogie-yellow) !important;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ULTRA-COLORFUL BROADWAY BOOGIE-WOOGIE MASTER THEME
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. TRIAGE CHAT WORKSPACE & INPUT BAR ── */
+#page-triage .chat-workspace {
+  background-color: #FFFDF0 !important;
+  background-image: 
+    linear-gradient(to right, rgba(255, 210, 0, 0.18) 2px, transparent 2px),
+    linear-gradient(to bottom, rgba(255, 210, 0, 0.18) 2px, transparent 2px);
+  background-size: 60px 60px;
+  position: relative;
+}
+
+[data-theme="dark"] #page-triage .chat-workspace {
+  background-color: #0A0F1E !important;
+  background-image: 
+    linear-gradient(to right, rgba(255, 220, 50, 0.12) 2px, transparent 2px),
+    linear-gradient(to bottom, rgba(255, 220, 50, 0.12) 2px, transparent 2px);
+  background-size: 60px 60px;
+}
+
+/* Chat Input Bar - Sunny Cadmium Avenue */
+.chat-input-bar {
+  background: #FFF8D6 !important;
+  border-top: 4px solid var(--mondrian-black) !important;
+  box-shadow: inset 0 6px 0 var(--boogie-yellow) !important;
+  position: relative;
+}
+
+[data-theme="dark"] .chat-input-bar {
+  background: #111A2E !important;
+  border-top: 4px solid #000000 !important;
+  box-shadow: inset 0 6px 0 var(--boogie-yellow), 0 -4px 16px rgba(0,0,0,0.5) !important;
+}
+
+/* Chat Input Field */
+.text-fallback-row input {
+  background-color: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 2px 2px 0 var(--boogie-yellow), 4px 4px 0 #0F1115 !important;
+  font-weight: 600 !important;
+  color: #0F1115 !important;
+}
+
+.text-fallback-row input:focus {
+  border-color: #1D4ED8 !important;
+  box-shadow: 0 0 0 3px rgba(255, 210, 0, 0.5), 3px 3px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .text-fallback-row input {
+  background-color: #1A243B !important;
+  border: 3px solid #FFDC33 !important;
+  color: #F8FAFC !important;
+  box-shadow: 0 0 10px rgba(255, 220, 50, 0.2), 3px 3px 0 #000 !important;
+}
+
+/* Send Button inside Input Row */
+.text-fallback-row button[type="submit"] {
+  background-color: #FFD200 !important;
+  color: #0F1115 !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 2px 2px 0 #EF233C, 4px 4px 0 #0F1115 !important;
+  font-weight: 900 !important;
+}
+
+.text-fallback-row button[type="submit"]:hover {
+  background-color: #FFE566 !important;
+  transform: translate(1px, 1px) !important;
+}
+
+/* Empty Chat Welcome Card */
+.empty-chat-state {
+  background: #FFFDF0 !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 4px 4px 0 var(--boogie-yellow), 8px 8px 0 #0F1115 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-chat-state::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: var(--boogie-track-h);
+  background-size: 168px 100%;
+}
+
+[data-theme="dark"] .empty-chat-state {
+  background: #141D33 !important;
+  border: 3px solid #FFDC33 !important;
+  box-shadow: 0 0 20px rgba(255, 220, 50, 0.25), 6px 6px 0 #000 !important;
+}
+
+/* Chat Bin Sidebar - Warm Golden Cream Canvas */
+.history-sidebar {
+  background-color: #FFF9E6 !important;
+  border-left: 4px solid var(--mondrian-black) !important;
+}
+
+[data-theme="dark"] .history-sidebar {
+  background-color: #0E1626 !important;
+  border-left: 4px solid #000000 !important;
+}
+
+.sidebar-header {
+  background: var(--mondrian-red) !important;
+  color: #FFFFFF !important;
+  border-bottom: 3px solid var(--mondrian-black) !important;
+  padding: 0.85rem 1.25rem !important;
+}
+
+.sidebar-header h3 {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.03em !important;
+}
+
+.sidebar-header .btn {
+  background: var(--boogie-yellow) !important;
+  color: #0F1115 !important;
+  border: 2px solid #0F1115 !important;
+}
+
+.history-item-card {
+  background: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 2px 2px 0 var(--boogie-yellow), 4px 4px 0 #0F1115 !important;
+  margin-bottom: 0.85rem !important;
+  position: relative;
+}
+
+[data-theme="dark"] .history-item-card {
+  background: #18233C !important;
+  border: 2px solid #38BDF8 !important;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2), 3px 3px 0 #000 !important;
+}
+
+/* ── 2. HEALTH PROFILE PAGE (Royal Blue Theme) ── */
+#page-profile .page-title-banner {
+  background: #EFF6FF !important;
+  border: 3px solid #1D4ED8 !important;
+  box-shadow: 3px 3px 0 #FFD200, 6px 6px 0 #0F1115 !important;
+  padding: 1.25rem 1.75rem !important;
+  border-radius: 4px;
+}
+
+[data-theme="dark"] #page-profile .page-title-banner {
+  background: #0E2242 !important;
+  border: 3px solid #38BDF8 !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3), 4px 4px 0 #000 !important;
+}
+
+.profile-summary-box {
+  background: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 4px 4px 0 #1D4ED8, 8px 8px 0 #0F1115 !important;
+  position: relative;
+}
+
+.profile-summary-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, #1D4ED8 0 20px, #FFD200 20px 40px, #EF233C 40px 60px, #10B981 60px 80px);
+}
+
+[data-theme="dark"] .profile-summary-box {
+  background: #131D33 !important;
+  border: 3px solid #38BDF8 !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.25), 6px 6px 0 #000 !important;
+}
+
+.profile-avatar {
+  background-color: #1D4ED8 !important;
+  box-shadow: 2px 2px 0 #FFD200 !important;
+}
+
+.profile-form-card {
+  background: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 4px 4px 0 #FFD200, 8px 8px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .profile-form-card {
+  background: #131D33 !important;
+  border: 3px solid #FFDC33 !important;
+  box-shadow: 0 0 16px rgba(255, 220, 50, 0.25), 6px 6px 0 #000 !important;
+}
+
+.profile-form-card fieldset {
+  border: 2px solid #0F1115 !important;
+  background: #FFFDF5 !important;
+  padding: 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.06);
+}
+
+[data-theme="dark"] .profile-form-card fieldset {
+  background: #192338 !important;
+  border: 2px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.profile-form-card fieldset:nth-of-type(1) { border-left: 6px solid #1D4ED8 !important; }
+.profile-form-card fieldset:nth-of-type(2) { border-left: 6px solid #FFD200 !important; }
+.profile-form-card fieldset:nth-of-type(3) { border-left: 6px solid #EF233C !important; }
+.profile-form-card fieldset:nth-of-type(4) { border-left: 6px solid #8B5CF6 !important; }
+
+/* ── 3. DISEASE ENCYCLOPEDIA PAGE (Crimson & Multi-Category) ── */
+.encyc-header-strip {
+  background: #FFF3C4 !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 3px 3px 0 #EF233C, 6px 6px 0 #0F1115 !important;
+  padding: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+[data-theme="dark"] .encyc-header-strip {
+  background: #2D2206 !important;
+  border: 3px solid #FFDC33 !important;
+  box-shadow: 0 0 16px rgba(255, 220, 50, 0.3), 4px 4px 0 #000 !important;
+}
+
+.encyc-filter-chip {
+  background: #FFFFFF !important;
+  border: 2px solid #0F1115 !important;
+  box-shadow: 2px 2px 0 #0F1115 !important;
+  font-weight: 800 !important;
+  color: #0F1115 !important;
+}
+
+.encyc-filter-chip:hover {
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0 #0F1115 !important;
+}
+
+.encyc-filter-chip.active {
+  background: var(--boogie-yellow) !important;
+  border: 2px solid #0F1115 !important;
+  box-shadow: 2px 2px 0 #EF233C, 4px 4px 0 #0F1115 !important;
+}
+
+.encyc-filter-chip[data-category="respiratory"].active { background: #0284C7 !important; color: white !important; }
+.encyc-filter-chip[data-category="cardiovascular"].active { background: #EF233C !important; color: white !important; }
+.encyc-filter-chip[data-category="neurological"].active { background: #8B5CF6 !important; color: white !important; }
+.encyc-filter-chip[data-category="digestive"].active { background: #10B981 !important; color: white !important; }
+.encyc-filter-chip[data-category="infectious"].active { background: #F97316 !important; color: white !important; }
+.encyc-filter-chip[data-category="musculoskeletal"].active { background: #F59E0B !important; color: white !important; }
+.encyc-filter-chip[data-category="mental_health"].active { background: #6366F1 !important; color: white !important; }
+.encyc-filter-chip[data-category="metabolic"].active { background: #14B8A6 !important; color: white !important; }
+
+.encyc-card {
+  background: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 3px 3px 0 var(--boogie-yellow), 6px 6px 0 #0F1115 !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.encyc-card:hover {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0 var(--boogie-yellow), 3px 3px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .encyc-card {
+  background: #141D33 !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5), 4px 4px 0 #000 !important;
+}
+
+[data-theme="dark"] .encyc-card:hover {
+  border-color: #38BDF8 !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.3), 2px 2px 0 #000 !important;
+}
+
+/* ── 4. ANALYTICS DASHBOARD (Vibrant Pop Colors) ── */
+.analytics-metrics-grid .metric-card {
+  border: 3px solid #0F1115 !important;
+  padding: 1.25rem !important;
+  position: relative;
+}
+
+.analytics-metrics-grid .metric-card:nth-child(1) {
+  background: #FEE2E2 !important;
+  border-top: 6px solid #EF233C !important;
+  box-shadow: 3px 3px 0 #EF233C, 6px 6px 0 #0F1115 !important;
+}
+.analytics-metrics-grid .metric-card:nth-child(2) {
+  background: #FEF3C7 !important;
+  border-top: 6px solid #F59E0B !important;
+  box-shadow: 3px 3px 0 #F59E0B, 6px 6px 0 #0F1115 !important;
+}
+.analytics-metrics-grid .metric-card:nth-child(3) {
+  background: #E0F2FE !important;
+  border-top: 6px solid #0284C7 !important;
+  box-shadow: 3px 3px 0 #0284C7, 6px 6px 0 #0F1115 !important;
+}
+.analytics-metrics-grid .metric-card:nth-child(4) {
+  background: #D1FAE5 !important;
+  border-top: 6px solid #10B981 !important;
+  box-shadow: 3px 3px 0 #10B981, 6px 6px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .analytics-metrics-grid .metric-card:nth-child(1) { background: #3B0D11 !important; }
+[data-theme="dark"] .analytics-metrics-grid .metric-card:nth-child(2) { background: #351C05 !important; }
+[data-theme="dark"] .analytics-metrics-grid .metric-card:nth-child(3) { background: #082F49 !important; }
+[data-theme="dark"] .analytics-metrics-grid .metric-card:nth-child(4) { background: #06331D !important; }
+
+.analytics-section-card {
+  background: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 4px 4px 0 #FFD200, 8px 8px 0 #0F1115 !important;
+  position: relative;
+}
+
+.analytics-section-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--boogie-track-h);
+  background-size: 168px 100%;
+}
+
+[data-theme="dark"] .analytics-section-card {
+  background: #141D33 !important;
+  border: 3px solid #38BDF8 !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.25), 6px 6px 0 #000 !important;
+}
+
+/* ── 5. EMERGENCY QUICK GUIDE ── */
+.emergency-alert-banner {
+  background: #EF233C !important;
+  color: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 4px 4px 0 #FFD200, 8px 8px 0 #0F1115 !important;
+}
+
+.emergency-dials-box {
+  background: #FEE2E2 !important;
+  border: 3px solid #DC2626 !important;
+  box-shadow: 3px 3px 0 #0F1115 !important;
+}
+
+.emergency-contact-box {
+  background: #E0F2FE !important;
+  border: 3px solid #0284C7 !important;
+  box-shadow: 3px 3px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .emergency-dials-box { background: #3B0D11 !important; border-color: #EF4444 !important; }
+[data-theme="dark"] .emergency-contact-box { background: #082F49 !important; border-color: #38BDF8 !important; }
+
+.emergency-card {
+  background: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 3px 3px 0 var(--boogie-yellow), 6px 6px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .emergency-card {
+  background: #141D33 !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5), 4px 4px 0 #000 !important;
+}
+
+/* ── 6. MEDICATION LOG ── */
+.med-checklist-panel {
+  background: #F0FDF4 !important;
+  border: 3px solid #10B981 !important;
+  box-shadow: 3px 3px 0 #FFD200, 6px 6px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .med-checklist-panel {
+  background: #062E20 !important;
+  border: 3px solid #34D399 !important;
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.25), 4px 4px 0 #000 !important;
+}
+
+.med-todo-card {
+  background: #FFFFFF !important;
+  border: 2px solid #0F1115 !important;
+  box-shadow: 2px 2px 0 #10B981, 4px 4px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .med-todo-card {
+  background: #13241C !important;
+  border: 2px solid #34D399 !important;
+}
+
+.med-form-card {
+  background: #FFFDF0 !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 3px 3px 0 #10B981, 6px 6px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .med-form-card {
+  background: #131E2B !important;
+  border: 3px solid #34D399 !important;
+}
+
+/* ── 7. SYSTEM SETTINGS ── */
+.settings-card {
+  background: #FFFFFF !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 3px 3px 0 #8B5CF6, 6px 6px 0 #0F1115 !important;
+  margin-bottom: 1.5rem !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.settings-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, #8B5CF6 0 20px, #FFD200 20px 40px, #1D4ED8 40px 60px, #EF233C 60px 80px);
+}
+
+[data-theme="dark"] .settings-card {
+  background: #141D33 !important;
+  border: 3px solid #A78BFA !important;
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.25), 6px 6px 0 #000 !important;
+}
