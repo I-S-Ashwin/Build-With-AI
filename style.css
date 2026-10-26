@@ -3173,3 +3173,214 @@ body {
   border: 3px solid #A78BFA !important;
   box-shadow: 0 0 16px rgba(167, 139, 250, 0.25), 6px 6px 0 #000 !important;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   TACTILE & COLORFUL HOVER STATES FOR ALL BUTTONS & CONTROLS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Universal Button Transition */
+.btn {
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              box-shadow 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              background-color 0.18s ease,
+              color 0.18s ease,
+              border-color 0.18s ease !important;
+}
+
+/* Base button hover */
+.btn:hover {
+  background-color: var(--boogie-yellow) !important;
+  color: #0F1115 !important;
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0 var(--boogie-yellow), 3px 3px 0 var(--mondrian-black) !important;
+}
+
+/* Primary Button Hover: Vibrant Crimson flips to Radiant Cadmium Yellow! */
+.btn-primary:hover {
+  background-color: var(--boogie-yellow) !important;
+  color: #0F1115 !important;
+  border-color: #0F1115 !important;
+  box-shadow: 2px 2px 0 var(--mondrian-red), 4px 4px 0 #0F1115 !important;
+}
+
+/* Secondary Button Hover: Surface flips to Royal Cobalt Blue with White text! */
+.btn-secondary:hover {
+  background-color: var(--mondrian-blue) !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  box-shadow: 2px 2px 0 var(--boogie-yellow), 4px 4px 0 #0F1115 !important;
+}
+
+/* Dark mode button hovers */
+[data-theme="dark"] .btn-primary:hover {
+  background-color: #FFDC33 !important;
+  color: #000000 !important;
+  border-color: #FFDC33 !important;
+  box-shadow: 0 0 16px rgba(255, 220, 51, 0.5), 2px 2px 0 #000 !important;
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background-color: #38BDF8 !important;
+  color: #000000 !important;
+  border-color: #38BDF8 !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.5), 2px 2px 0 #000 !important;
+}
+
+/* Specific interactive buttons */
+
+/* 1. Header Demo Button */
+#btn-demo-header {
+  background-color: var(--boogie-yellow) !important;
+  color: #0F1115 !important;
+  border: 3px solid #0F1115 !important;
+}
+#btn-demo-header:hover {
+  background-color: var(--mondrian-red) !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  box-shadow: 2px 2px 0 var(--boogie-yellow), 4px 4px 0 #0F1115 !important;
+}
+
+/* 2. Header API Key Button */
+#btn-api-key:hover {
+  background-color: #1D4ED8 !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+}
+
+/* 3. Header Tour Button */
+#btn-tutorial-replay:hover {
+  background-color: #F59E0B !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+}
+
+/* 4. Header Logout Button */
+#btn-logout:hover {
+  background-color: #EF233C !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+}
+
+/* 5. Close Consultation Buttons */
+#btn-close-consultation, #btn-top-close-consult {
+  transition: all 0.18s ease !important;
+}
+#btn-close-consultation:hover, #btn-top-close-consult:hover {
+  background-color: #EF233C !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  box-shadow: 2px 2px 0 #FFD200, 4px 4px 0 #0F1115 !important;
+}
+
+/* 6. Save Consultation Buttons */
+#btn-top-save-consult:hover, .btn-save-bubble:hover, #modal-close-consult-save:hover {
+  background-color: #10B981 !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  box-shadow: 2px 2px 0 #FFD200, 4px 4px 0 #0F1115 !important;
+}
+
+/* 7. Chat Send Button */
+.text-fallback-row button[type="submit"]:hover {
+  background-color: #EF233C !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  box-shadow: 2px 2px 0 #FFD200, 4px 4px 0 #0F1115 !important;
+}
+
+/* 8. History Bin Card Action Buttons */
+.history-item-card .btn-card-action:nth-child(1):hover {
+  background-color: #1D4ED8 !important;
+  color: #FFFFFF !important;
+}
+.history-item-card .btn-card-action:nth-child(2):hover {
+  background-color: #FFD200 !important;
+  color: #0F1115 !important;
+}
+.history-item-card .btn-delete-action:hover {
+  background-color: #EF233C !important;
+  color: #FFFFFF !important;
+  transform: scale(1.18) rotate(90deg) !important;
+}
+
+/* 9. Disease Encyclopedia Card Button */
+.btn-inspect-disease:hover {
+  background-color: #FFD200 !important;
+  color: #0F1115 !important;
+  border-color: #0F1115 !important;
+}
+
+/* 10. Symptom Quick Chips Hover Transitions */
+.symptom-chip {
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              box-shadow 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              background-color 0.18s ease,
+              color 0.18s ease,
+              border-color 0.18s ease !important;
+}
+
+.symptom-chip:nth-child(1):hover {
+  background-color: #F59E0B !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  transform: translate(2px, 2px) scale(1.02) !important;
+  box-shadow: 1px 1px 0 #F59E0B, 2px 2px 0 #0F1115 !important;
+}
+
+.symptom-chip:nth-child(2):hover {
+  background-color: #0284C7 !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  transform: translate(2px, 2px) scale(1.02) !important;
+  box-shadow: 1px 1px 0 #0284C7, 2px 2px 0 #0F1115 !important;
+}
+
+.symptom-chip:nth-child(3):hover {
+  background-color: #EF233C !important;
+  color: #FFFFFF !important;
+  border-color: #0F1115 !important;
+  transform: translate(2px, 2px) scale(1.02) !important;
+  box-shadow: 1px 1px 0 #EF233C, 2px 2px 0 #0F1115 !important;
+}
+
+/* 11. Energy Tag Buttons */
+.btn-energy-tag {
+  transition: all 0.15s ease !important;
+}
+.btn-energy-tag:hover {
+  background-color: var(--boogie-cadmium) !important;
+  color: #0F1115 !important;
+  transform: translate(1px, 1px) scale(1.05) !important;
+}
+
+/* 12. Microphone Button Hover */
+.btn-mic {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              box-shadow 0.2s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              background-color 0.2s ease !important;
+}
+.btn-mic:hover {
+  transform: scale(1.1) !important;
+  background-color: #D90429 !important;
+  box-shadow: 0 0 18px rgba(239, 35, 60, 0.6), 4px 4px 0 #0F1115 !important;
+}
+
+/* 13. Interactive Cards (Hover lift effect) */
+.history-item-card, .encyc-card, .emergency-card, .med-todo-card {
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              box-shadow 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2),
+              background-color 0.18s ease !important;
+}
+
+.history-item-card:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 4px 4px 0 var(--boogie-yellow), 6px 6px 0 #0F1115 !important;
+}
+
+.med-todo-card:hover {
+  transform: translate(-1px, -2px) !important;
+  box-shadow: 3px 3px 0 #10B981, 6px 6px 0 #0F1115 !important;
+  background: #FFFDF5 !important;
+}
