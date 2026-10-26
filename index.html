@@ -37,6 +37,7 @@
         <span class="brand-title">MediSense</span>
       </div>
       <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <button type="button" id="btn-show-shortcuts" class="btn btn-secondary" style="padding:0.45rem 0.8rem;font-size:0.85rem;" title="Keyboard Shortcuts (?)" onclick="document.getElementById('keyboard-shortcuts-modal').style.display='flex'">⌨️ Shortcuts</button>
         <button class="btn btn-theme-toggle theme-toggle-btn" aria-label="Toggle theme"><span class="theme-pill-track"><span class="theme-cube moon">🌙</span></span><span class="theme-pill-text">Broadway Night</span></button>
         <button id="btn-demo-header" class="btn btn-secondary">⚡ Try Demo</button>
         <button id="btn-preview-login" class="btn btn-primary">Log In &rarr;</button>
@@ -316,6 +317,24 @@
           <!-- Rendered dynamically by ProfilePage.render() -->
         </div>
 
+        <!-- Health Risk Index Card -->
+        <div id="health-risk-index-card" class="health-risk-card" style="display:none;">
+          <div class="health-risk-strip">
+            <div class="health-risk-left">
+              <div class="health-risk-label">🧬 Health Risk Index</div>
+              <div class="health-risk-score" id="health-risk-score">—</div>
+              <div class="health-risk-sublabel" id="health-risk-level">Complete your profile for assessment</div>
+            </div>
+            <div class="health-risk-gauge-wrap">
+              <svg viewBox="0 0 120 70" width="120" height="70" class="health-risk-gauge-svg">
+                <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#E5E7EB" stroke-width="12" stroke-linecap="round"/>
+                <path id="gauge-arc" d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#10B981" stroke-width="12" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157" style="transition:stroke-dashoffset 1s ease,stroke 0.5s ease;"/>
+                <text x="60" y="68" text-anchor="middle" font-size="13" font-weight="900" fill="currentColor" id="gauge-text">—</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
         <!-- Profile Form Card -->
         <div class="profile-form-card">
           <form id="form-profile">
@@ -405,6 +424,16 @@
         </div>
 
         <!-- BMI & Vitals Strip Widget -->
+        <!-- Profile Saved Knowledge Bookmarks -->
+        <div id="profile-bookmarks-card" class="profile-form-card" style="margin-top: 1.25rem; display: none;">
+          <h4 style="margin: 0 0 0.5rem; font-size: 1rem; color: #D97706; display: flex; align-items: center; gap: 0.5rem;">
+            ⭐ Saved Clinical Conditions
+            <span id="profile-bookmark-badge" class="badge" style="background:#FEF3C7; color:#92400E; font-size:0.75rem;">0 saved</span>
+          </h4>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.75rem;">Your starred conditions from the medical encyclopedia for quick clinical reference.</p>
+          <div id="profile-bookmarks-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+        </div>
+
         <div class="bmi-widget-strip" id="profile-bmi-strip">
           <div class="bmi-cell bmi-cell-1">
             <div class="bmi-cell-label">BMI Index</div>
@@ -505,6 +534,7 @@
       <!-- Category Filter Chips -->
       <div class="encyc-category-chips-bar">
         <button type="button" class="encyc-filter-chip active" data-category="all">All Conditions (116)</button>
+        <button type="button" class="encyc-filter-chip encyc-chip-bookmarked" data-category="bookmarked" style="border-color:#F59E0B;color:#D97706;font-weight:900;">⭐ Saved (<span id="encyc-bookmark-count">0</span>)</button>
         <button type="button" class="encyc-filter-chip" data-category="respiratory">Respiratory</button>
         <button type="button" class="encyc-filter-chip" data-category="cardiovascular">Cardiovascular</button>
         <button type="button" class="encyc-filter-chip" data-category="neurological">Neurological</button>
@@ -835,7 +865,10 @@
                 <h3 id="med-today-date" style="margin: 0; font-size: 1.25rem;">Today's Schedule</h3>
                 <span id="med-today-progress" class="checklist-progress-text">0 scheduled</span>
               </div>
-              <span class="live-dot" title="Live daily tracker"></span>
+              <div style="display:flex;align-items:center;gap:0.6rem;">
+                <span id="med-refill-alert" class="refill-alert-badge" style="display:none;" title="Medications may need refill soon">⚠️ Refill Soon</span>
+                <span class="live-dot" title="Live daily tracker"></span>
+              </div>
             </div>
 
             <!-- List of today's medication items -->
@@ -900,6 +933,26 @@
               <h4 style="margin: 0 0 0.5rem; font-size: 1rem;">All Active Medications</h4>
               <div id="med-all-list">
                 <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- Drug Interaction Checker -->
+            <div class="drug-interaction-panel" style="margin-top: 1.25rem;">
+              <div class="drug-interaction-header">
+                ⚡ Drug Interaction Checker
+              </div>
+              <p style="font-size:0.82rem;color:var(--text-muted);margin:0.5rem 0.75rem;">Select two medications from your list to check for known interactions.</p>
+              <div style="padding:0 0.75rem 0.75rem;display:flex;flex-direction:column;gap:0.5rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                  <select id="drug-check-a" class="input-text" style="font-size:0.82rem;padding:0.4rem 0.6rem;">
+                    <option value="">— Drug A —</option>
+                  </select>
+                  <select id="drug-check-b" class="input-text" style="font-size:0.82rem;padding:0.4rem 0.6rem;">
+                    <option value="">— Drug B —</option>
+                  </select>
+                </div>
+                <button type="button" id="btn-check-interaction" class="btn btn-primary" style="padding:0.5rem 1rem;font-size:0.85rem;align-self:flex-start;">🔬 Check Interaction</button>
+                <div id="drug-interaction-result" style="display:none;padding:0.75rem;border:2px solid;font-size:0.85rem;font-weight:700;border-radius:0;"></div>
               </div>
             </div>
           </div>
@@ -1037,9 +1090,51 @@
         </div>
       </div>
     </div>
-  </section>
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="keyboard-shortcuts-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
+    <div class="modal-box" style="max-width:520px;">
+      <div class="modal-header" style="background:var(--mondrian-black);color:#FFD200;border-bottom:3px solid #FFD200;">
+        <span style="font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:0.1em;">⌨️ Keyboard Shortcuts</span>
+        <button type="button" class="modal-close-btn" onclick="document.getElementById('keyboard-shortcuts-modal').style.display='none'" style="color:#FFD200;">✕</button>
+      </div>
+      <div class="modal-content" style="padding:1.25rem;">
+        <div class="kb-shortcuts-grid">
+          <div class="kb-shortcut-row"><kbd>T</kbd><span>Open Triage Chat</span></div>
+          <div class="kb-shortcut-row"><kbd>P</kbd><span>Open Health Profile</span></div>
+          <div class="kb-shortcut-row"><kbd>E</kbd><span>Open Encyclopedia</span></div>
+          <div class="kb-shortcut-row"><kbd>A</kbd><span>Open Analytics</span></div>
+          <div class="kb-shortcut-row"><kbd>R</kbd><span>Open Emergency</span></div>
+          <div class="kb-shortcut-row"><kbd>M</kbd><span>Open Medication</span></div>
+          <div class="kb-shortcut-row"><kbd>S</kbd><span>Open Settings</span></div>
+          <div class="kb-shortcut-row"><kbd>/</kbd><span>Focus Encyclopedia search</span></div>
+          <div class="kb-shortcut-row"><kbd>Esc</kbd><span>Close modals / overlays</span></div>
+          <div class="kb-shortcut-row"><kbd>?</kbd><span>Show this shortcuts panel</span></div>
+          <div class="kb-shortcut-row"><kbd>D</kbd><span>Toggle Dark / Light theme</span></div>
+          <div class="kb-shortcut-row"><kbd>N</kbd><span>New triage consultation</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <!-- Screen 5: Full-Screen Cinematic Response Overlay -->
+  <!-- Share Result Modal -->
+  <div id="share-result-modal" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width:480px;">
+      <div class="modal-header" style="background:#1D4ED8;color:#fff;border-bottom:3px solid #fff;">
+        <span style="font-size:1rem;font-weight:900;">📤 Share Triage Result</span>
+        <button type="button" class="modal-close-btn" onclick="document.getElementById('share-result-modal').style.display='none'" style="color:#fff;">✕</button>
+      </div>
+      <div class="modal-content" style="padding:1.25rem;">
+        <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 0.75rem;">Copy the triage summary below and paste it into a message to share with a family member or doctor.</p>
+        <textarea id="share-result-text" class="input-text" rows="6" readonly style="font-size:0.82rem;resize:none;font-family:monospace;line-height:1.5;background:var(--bg-app);" placeholder="Run a triage consultation first to generate a shareable summary."></textarea>
+        <div style="display:flex;gap:0.75rem;margin-top:1rem;justify-content:flex-end;">
+          <button type="button" class="btn btn-primary" id="btn-copy-share" style="padding:0.5rem 1.25rem;">📋 Copy to Clipboard</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('share-result-modal').style.display='none'" style="padding:0.5rem 1rem;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Full-Screen Cinematic Response Overlay -->
   <section id="screen-fullscreen-response" class="fullscreen-response-overlay" style="display: none;">
     <div class="fullscreen-response-card">
       <div class="response-accent-strip">
@@ -1058,6 +1153,20 @@
           Triage Assessment
         </h2>
         
+        <!-- Confidence Score Bar -->
+        <div id="confidence-score-strip" style="margin:0.75rem 0;display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <span style="font-size:0.8rem;font-weight:900;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Diagnostic Confidence</span>
+            <span id="confidence-score-pct" style="font-size:1.1rem;font-weight:900;color:#1D4ED8;">—</span>
+          </div>
+          <div style="height:14px;background:var(--bg-app);border:2px solid var(--mondrian-black);overflow:hidden;">
+            <div id="confidence-score-bar" style="height:100%;width:0%;transition:width 0.8s ease;background:linear-gradient(90deg,#EF233C 0%,#F59E0B 40%,#10B981 100%);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.7rem;font-weight:800;margin-top:0.25rem;opacity:0.6;">
+            <span>Uncertain</span><span>Moderate</span><span>High Confidence</span>
+          </div>
+        </div>
+
         <div class="fullscreen-body-scroll">
           <p id="fullscreen-advice-text" class="fullscreen-body-text">
             Diagnosis details will appear here.
@@ -1069,6 +1178,12 @@
             MediSense Personal Healthcare Safety Net
           </span>
           <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+            <button type="button" id="btn-share-result" class="btn btn-secondary" style="font-size:0.95rem;padding:0.75rem 1.2rem;border-color:#1D4ED8;color:#1D4ED8;" title="Share this triage result">
+              📤 Share
+            </button>
+            <button type="button" id="btn-print-doctor-note" class="btn btn-secondary" style="font-size:0.95rem;padding:0.75rem 1.2rem;border-color:#059669;color:#059669;" title="Generate & Print Clinical Note for Doctor">
+              🖨️ Doctor Note
+            </button>
             <button id="btn-fullscreen-close-nosave" class="btn btn-secondary" style="font-size: 1rem; padding: 0.85rem 1.5rem;">
               ✕ Close
             </button>
@@ -1248,5 +1363,7 @@
   <script type="module" src="whisper-local.js"></script>
   <script src="pages.js"></script>
   <script src="main.js"></script>
+  <!-- Printable Doctor Intake Note Container -->
+  <div id="doctor-print-container" style="display:none;"></div>
 </body>
 </html>

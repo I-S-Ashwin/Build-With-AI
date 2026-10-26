@@ -324,15 +324,20 @@ const EncyclopediaPage = {
     const kb = (typeof MEDISENSE_KB !== 'undefined') ? MEDISENSE_KB : [];
 
     // Filter
+    const bookmarks = (typeof getBookmarks === 'function') ? getBookmarks() : [];
     const filtered = kb.filter(item => {
-      const matchesCategory = (this.selectedCategory === 'all') || (item.category === this.selectedCategory);
-      if (!matchesCategory) return false;
+      if (this.selectedCategory === 'bookmarked') {
+        if (!bookmarks.includes(item.name)) return false;
+      } else {
+        const matchesCategory = (this.selectedCategory === 'all') || (item.category === this.selectedCategory);
+        if (!matchesCategory) return false;
+      }
 
       if (!this.searchQuery) return true;
       const textMatch = item.name.toLowerCase().includes(this.searchQuery) ||
                         item.category.toLowerCase().includes(this.searchQuery) ||
-                        item.keywords.some(kw => kw.toLowerCase().includes(this.searchQuery)) ||
-                        item.advice.toLowerCase().includes(this.searchQuery);
+                        (item.keywords && item.keywords.some(kw => kw.toLowerCase().includes(this.searchQuery))) ||
+                        (item.advice && item.advice.toLowerCase().includes(this.searchQuery));
       return textMatch;
     });
 
@@ -363,8 +368,12 @@ const EncyclopediaPage = {
       const fatigueChip = s.fatigue ? '<span class="sym-badge sym-yes">Fatigue ✓</span>' : '';
       const dyspneaChip = s.breathingDifficulty ? '<span class="sym-badge sym-breathing">Breathing Difficulty ⚠️</span>' : '';
 
+      const isBookmarked = bookmarks.includes(item.name);
       return `
         <article class="encyc-card" data-disease-name="${escapeHtml(item.name)}">
+          <button type="button" class="encyc-card-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" onclick="event.stopPropagation(); EncyclopediaPage.toggleBookmark('${escapeHtml(item.name).replace(/'/g, "\\'")}')" title="${isBookmarked ? 'Remove from Saved' : 'Save Condition Bookmark'}">
+            ${isBookmarked ? '⭐' : '☆'}
+          </button>
           <div class="encyc-card-top">
             <span class="category-tag tag-${item.category || 'general'}">${item.category || 'General'}</span>
             ${urgencyBadge}
@@ -390,6 +399,28 @@ const EncyclopediaPage = {
         </article>
       `;
     }).join('');
+  },
+
+  toggleBookmark(diseaseName) {
+    let bms = (typeof getBookmarks === 'function') ? getBookmarks() : [];
+    if (bms.includes(diseaseName)) {
+      bms = bms.filter(n => n !== diseaseName);
+    } else {
+      bms.push(diseaseName);
+    }
+    if (typeof saveBookmarks === 'function') saveBookmarks(bms);
+    this.renderCards();
+  },
+
+  search(query) {
+    this.searchQuery = (query || '').toLowerCase().trim();
+    this.selectedCategory = 'all';
+    const input = document.getElementById('encyc-search-input');
+    if (input) input.value = query;
+    document.querySelectorAll('.encyc-filter-chip').forEach(c => {
+      c.classList.toggle('active', c.getAttribute('data-category') === 'all');
+    });
+    this.renderCards();
   },
 
   openDetailModal(diseaseName) {
@@ -674,6 +705,10 @@ const MedicationPage = {
     container.innerHTML = sorted.map(med => {
       const isTaken = (med.takenDates || []).includes(todayStr);
       const streak = this.calculateStreak(med.takenDates || []);
+      const created = med.createdAt ? new Date(med.createdAt).getTime() : Date.now();
+      const daysSince = Math.floor((Date.now() - created) / (1000 * 60 * 60 * 24));
+      const cycleDay = (daysSince % 30) + 1;
+      const refillBadge = cycleDay >= 25 ? `<span class="refill-alert-badge" style="font-size:0.65rem;margin-left:6px;">⚠️ Refill in ${30 - cycleDay}d</span>` : '';
 
       return `
         <div class="med-todo-card ${isTaken ? 'med-completed' : ''}" data-med-id="${med.id}">
@@ -685,6 +720,7 @@ const MedicationPage = {
             <div class="med-title-row">
               <strong class="med-name">${escapeHtml(med.name)}</strong>
               <span class="med-dosage-tag">${escapeHtml(med.dosage || 'Dose')}</span>
+              ${refillBadge}
             </div>
             <div class="med-detail-row">
               <span class="med-time-label">⏰ ${escapeHtml(med.timeOfDay || 'Daily')}</span>
@@ -1277,6 +1313,558 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+});
+
+
+/* ═══════════════════════════════════════════════════════════════
+   10-IN-1 ADVANCED CLINICAL FEATURES SUITE
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Encyclopedia Bookmarks Engine ───────────────── */
+function getBookmarks() {
+  try {
+    return JSON.parse(localStorage.getItem('medisense_bookmarks') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveBookmarks(arr) {
+  try {
+    localStorage.setItem('medisense_bookmarks', JSON.stringify(arr));
+  } catch (e) {}
+  updateBookmarkBadges();
+}
+
+function updateBookmarkBadges() {
+  const bms = getBookmarks();
+  const countEl = document.getElementById('encyc-bookmark-count');
+  if (countEl) countEl.textContent = `${bms.length}`;
+
+  const profileCard = document.getElementById('profile-bookmarks-card');
+  const profileList = document.getElementById('profile-bookmarks-list');
+  const profileBadge = document.getElementById('profile-bookmark-badge');
+
+  if (profileCard && profileList) {
+    if (bms.length > 0) {
+      profileCard.style.display = 'block';
+      if (profileBadge) profileBadge.textContent = `${bms.length} saved`;
+      profileList.innerHTML = bms.map(name => `
+        <button type="button" class="btn btn-secondary" style="font-size:0.8rem;padding:0.35rem 0.75rem;border-color:#F59E0B;color:#D97706;font-weight:900;" onclick="window.PageRouter?.navigateTo('page-encyclopedia'); setTimeout(() => { window.EncyclopediaPage?.search('${escapeHtml(name).replace(/'/g, "\\\'")}'); }, 150);">
+          ⭐ ${escapeHtml(name)}
+        </button>
+      `).join('');
+    } else {
+      profileCard.style.display = 'none';
+    }
+  }
+}
+
+/* ── 2. Health Risk Index Calculator (Profile Page) ──── */
+function updateHealthRiskIndex() {
+  const profile = (window.Storage && window.Storage.getProfile()) || {};
+  const card = document.getElementById('health-risk-index-card');
+  const scoreEl = document.getElementById('health-risk-score');
+  const levelEl = document.getElementById('health-risk-level');
+  const gaugeArc = document.getElementById('gauge-arc');
+  const gaugeText = document.getElementById('gauge-text');
+
+  if (!card || !scoreEl) return;
+
+  const age = parseInt(profile.age || document.getElementById('profile-age')?.value, 10) || 0;
+  const h = parseFloat(document.getElementById('profile-height')?.value) || 0;
+  const w = parseFloat(document.getElementById('profile-weight')?.value) || 0;
+  const conditions = profile.conditions || [];
+  const meds = profile.medications || document.getElementById('profile-medications')?.value || '';
+
+  if (!age && !conditions.length && !h) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+
+  let risk = 12; // Baseline healthy
+
+  if (age > 65) risk += 24;
+  else if (age > 50) risk += 16;
+  else if (age > 35) risk += 10;
+  else if (age > 0) risk += 4;
+
+  if (h > 0 && w > 0) {
+    const bmi = w / ((h / 100) ** 2);
+    if (bmi > 35) risk += 28;
+    else if (bmi > 30) risk += 18;
+    else if (bmi > 25) risk += 10;
+    else if (bmi < 18.5) risk += 8;
+  }
+
+  conditions.forEach(c => {
+    const cl = c.toLowerCase();
+    if (cl.includes('heart') || cl.includes('stroke') || cl.includes('kidney')) risk += 16;
+    else if (cl.includes('diabetes') || cl.includes('hypertension')) risk += 12;
+    else risk += 6;
+  });
+
+  if (meds.trim()) {
+    const medCount = meds.split(',').length;
+    risk += Math.min(medCount * 4, 16);
+  }
+
+  risk = Math.min(Math.max(risk, 8), 95);
+
+  scoreEl.textContent = `${risk} / 100`;
+
+  let strokeColor = '#10B981';
+  let levelText = '🟢 Low Chronic Risk (Optimal Baseline)';
+  if (risk > 55) {
+    strokeColor = '#EF4444';
+    levelText = '🔴 High Clinical Risk Profile — Consult Doctor for Regular Checkups';
+  } else if (risk > 30) {
+    strokeColor = '#F59E0B';
+    levelText = '🟡 Moderate Risk Profile — Watchful Lifestyle & Routine Monitoring';
+  }
+
+  levelEl.textContent = levelText;
+  if (gaugeText) {
+    gaugeText.textContent = `${risk}`;
+    gaugeText.setAttribute('fill', strokeColor);
+  }
+
+  if (gaugeArc) {
+    const arcLength = 157;
+    const offset = arcLength - (arcLength * (risk / 100));
+    gaugeArc.style.strokeDashoffset = `${offset}`;
+    gaugeArc.style.stroke = strokeColor;
+  }
+}
+
+/* ── 3. Drug Interaction Clinical Checker ───────────── */
+const CLINICAL_DRUG_INTERACTIONS = [
+  {
+    drugs: ['aspirin', 'ibuprofen'],
+    severity: 'danger',
+    title: 'Severe Bleeding & Cardioprotective Blunting',
+    text: 'Concurrent NSAID use markedly escalates upper GI ulceration and bleed risk. Ibuprofen also blocks the irreversible antiplatelet action of low-dose Aspirin.'
+  },
+  {
+    drugs: ['warfarin', 'aspirin'],
+    severity: 'danger',
+    title: 'Critical Hemorrhage Hazard',
+    text: 'Potentiation of anticoagulation with antiplatelet effects creates severe risk of major gastrointestinal and intracranial bleeding.'
+  },
+  {
+    drugs: ['lisinopril', 'spironolactone'],
+    severity: 'danger',
+    title: 'Severe Hyperkalemia Risk',
+    text: 'Both agents reduce renal potassium excretion, risking dangerous cardiac arrhythmias and sudden cardiac arrest.'
+  },
+  {
+    drugs: ['metformin', 'alcohol'],
+    severity: 'danger',
+    title: 'Lactic Acidosis Hazard',
+    text: 'Alcohol intake potentiates metformin-induced lactic acidosis, an uncommon but life-threatening metabolic emergency.'
+  },
+  {
+    drugs: ['sertraline', 'tramadol'],
+    severity: 'danger',
+    title: 'Acute Serotonin Syndrome',
+    text: 'Combining SSRIs with serotonergic opioid analgesics can precipitate acute hyperthermia, autonomic instability, and neuromuscular clonus.'
+  },
+  {
+    drugs: ['clopidogrel', 'omeprazole'],
+    severity: 'warning',
+    title: 'Reduced Antiplatelet Efficacy',
+    text: 'Omeprazole competitively inhibits CYP2C19 bioactivation of Clopidogrel, elevating risk of recurrent ischemic events.'
+  },
+  {
+    drugs: ['atorvastatin', 'amlodipine'],
+    severity: 'warning',
+    title: 'Elevated Statin Exposure',
+    text: 'Amlodipine inhibits CYP3A4-mediated statin clearance, increasing risk of myopathy, transaminitis, and muscle pain.'
+  },
+  {
+    drugs: ['ciprofloxacin', 'calcium'],
+    severity: 'warning',
+    title: 'Chelation Absorption Block',
+    text: 'Polyvalent cations bind fluoroquinolone antibiotics in the stomach, reducing therapeutic blood levels by up to 60%.'
+  },
+  {
+    drugs: ['albuterol', 'propranolol'],
+    severity: 'danger',
+    title: 'Bronchospasm Antagonism',
+    text: 'Non-selective beta-blockers block pulmonary beta-2 receptors, nullifying rescue inhaler action and inducing severe bronchospasm.'
+  },
+  {
+    drugs: ['acetaminophen', 'alcohol'],
+    severity: 'warning',
+    title: 'Potentiated Hepatotoxicity',
+    text: 'Chronic alcohol consumption induces CYP2E1, converting acetaminophen to toxic NAPQI metabolites and escalating acute liver injury risk.'
+  }
+];
+
+function initDrugInteractionChecker() {
+  const selectA = document.getElementById('drug-check-a');
+  const selectB = document.getElementById('drug-check-b');
+  const btnCheck = document.getElementById('btn-check-interaction');
+  const resultDiv = document.getElementById('drug-interaction-result');
+
+  if (!selectA || !selectB || !btnCheck) return;
+
+  function populateDropdowns() {
+    const meds = (window.Storage && window.Storage.getMedications()) || [];
+    const defaults = [
+      'Aspirin', 'Ibuprofen', 'Warfarin', 'Lisinopril', 'Spironolactone',
+      'Metformin', 'Alcohol', 'Sertraline', 'Tramadol', 'Clopidogrel',
+      'Omeprazole', 'Atorvastatin', 'Amlodipine', 'Ciprofloxacin',
+      'Albuterol', 'Propranolol', 'Acetaminophen'
+    ];
+
+    const allNames = Array.from(new Set([
+      ...meds.map(m => m.name),
+      ...defaults
+    ])).sort();
+
+    const currA = selectA.value;
+    const currB = selectB.value;
+
+    selectA.innerHTML = '<option value="">— Drug A —</option>' + allNames.map(n => `<option value="${escapeHtml(n.toLowerCase())}">${escapeHtml(n)}</option>`).join('');
+    selectB.innerHTML = '<option value="">— Drug B —</option>' + allNames.map(n => `<option value="${escapeHtml(n.toLowerCase())}">${escapeHtml(n)}</option>`).join('');
+
+    if (currA) selectA.value = currA;
+    if (currB) selectB.value = currB;
+  }
+
+  populateDropdowns();
+
+  btnCheck.onclick = () => {
+    const drugA = selectA.value.trim().toLowerCase();
+    const drugB = selectB.value.trim().toLowerCase();
+
+    if (!drugA || !drugB) {
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'interaction-warning';
+      resultDiv.innerHTML = '⚠️ Please select two medications to compare.';
+      return;
+    }
+
+    if (drugA === drugB) {
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'interaction-warning';
+      resultDiv.innerHTML = '⚠️ Duplicate selection. Please select two distinct agents.';
+      return;
+    }
+
+    const match = CLINICAL_DRUG_INTERACTIONS.find(entry => {
+      const [d1, d2] = entry.drugs;
+      return (drugA.includes(d1) && drugB.includes(d2)) || (drugA.includes(d2) && drugB.includes(d1));
+    });
+
+    resultDiv.style.display = 'block';
+    if (match) {
+      const isDanger = match.severity === 'danger';
+      resultDiv.className = isDanger ? 'interaction-danger' : 'interaction-warning';
+      resultDiv.innerHTML = `
+        <div style="font-size:0.95rem;font-weight:900;margin-bottom:0.25rem;">${isDanger ? '🚨 CRITICAL INTERACTION:' : '⚠️ CAUTION ADVISORY:'} ${match.title}</div>
+        <div style="font-size:0.85rem;line-height:1.45;">${match.text}</div>
+      `;
+    } else {
+      resultDiv.className = 'interaction-safe';
+      resultDiv.innerHTML = `
+        <div style="font-size:0.95rem;font-weight:900;margin-bottom:0.25rem;">✅ No Known Direct Conflict</div>
+        <div style="font-size:0.85rem;line-height:1.45;">No severe contraindication identified between <strong>${selectA.options[selectA.selectedIndex].text}</strong> and <strong>${selectB.options[selectB.selectedIndex].text}</strong> in our immediate clinical database. Always review dosing schedules with your prescribing physician.</div>
+      `;
+    }
+  };
+}
+
+/* ── 4. Medication Refill Monitor ───────────────────── */
+function checkMedicationRefills() {
+  const meds = (window.Storage && window.Storage.getMedications()) || [];
+  const alertBadge = document.getElementById('med-refill-alert');
+  if (!alertBadge) return;
+
+  const now = Date.now();
+  let refillCount = 0;
+
+  meds.forEach(med => {
+    const created = med.createdAt ? new Date(med.createdAt).getTime() : (now - (18 * 24 * 60 * 60 * 1000));
+    const daysSince = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+    const cycleDay = (daysSince % 30) + 1;
+    if (cycleDay >= 25) {
+      refillCount++;
+    }
+  });
+
+  if (refillCount > 0) {
+    alertBadge.style.display = 'inline-block';
+    alertBadge.textContent = `⚠️ ${refillCount} Refill${refillCount > 1 ? 's' : ''} Due`;
+  } else {
+    alertBadge.style.display = 'none';
+  }
+}
+
+/* ── 5. Share Triage Result Modal ───────────────────── */
+function openShareResultModal(outcome) {
+  const result = outcome || window.currentTriageOutcome;
+  const textArea = document.getElementById('share-result-text');
+  const modal = document.getElementById('share-result-modal');
+  if (!textArea || !modal) return;
+
+  const rawText = result ? (result.text || '') : '';
+  const cleanText = rawText.replace(/\[DIAGNOSIS_[A-Z]+\]/g, '').trim();
+  const verdict = (result && result.outcome === 'see-doctor') ? '⚠️ Clinical Examination Directed' : '🌿 Safe Routine Home Care';
+
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+
+  const formattedShare = `🏥 MediSense Healthcare Triage Assessment
+📅 Date: ${dateStr}
+Verdict: ${verdict}
+--------------------------------------------------
+${cleanText}
+--------------------------------------------------
+🔒 Assessed with MediSense offline clinical knowledge base.`;
+
+  textArea.value = formattedShare;
+  modal.style.display = 'flex';
+}
+
+/* ── 6. Printable Doctor Intake Note ────────────────── */
+function generateDoctorIntakeNote(outcome) {
+  const profile = (window.Storage && window.Storage.getProfile()) || {};
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+
+  const rawText = outcome ? (outcome.text || '') : (window.currentTriageOutcome ? window.currentTriageOutcome.text : 'Patient self-reported health intake.');
+  const cleanAdvice = rawText.replace(/\[DIAGNOSIS_[A-Z]+\]/g, '').trim();
+
+  const printDiv = document.getElementById('doctor-print-container');
+  if (!printDiv) return;
+
+  printDiv.innerHTML = `
+    <div class="doctor-note-box">
+      <div style="border-bottom: 3px solid #000; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 style="margin: 0; font-size: 1.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">MediSense Clinical Intake Summary</h1>
+          <p style="margin: 0.35rem 0 0; font-size: 0.95rem; color: #4B5563;">Confidential Patient-Reported Triage & Health Baseline Record</p>
+        </div>
+        <div style="text-align: right; font-size: 0.85rem; font-weight: 700; color: #4B5563;">
+          <div>Generated: ${dateStr}</div>
+          <div style="color: #1D4ED8; font-weight: 900;">Verified Offline Engine</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: #F3F4F6; padding: 1rem; border: 2px solid #000; margin-bottom: 1.5rem;">
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Patient Name</div>
+          <div style="font-size: 1.1rem; font-weight: 800;">${escapeHtml(profile.name || 'Unspecified')}</div>
+        </div>
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Age / Biological Sex</div>
+          <div style="font-size: 1.1rem; font-weight: 800;">${profile.age ? profile.age + ' yrs' : '—'} / ${escapeHtml(profile.gender || '—')}</div>
+        </div>
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Blood Group</div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #DC2626;">${escapeHtml(profile.bloodType || 'Unknown')}</div>
+        </div>
+        <div>
+          <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Emergency Contact</div>
+          <div style="font-size: 0.95rem; font-weight: 800;">${escapeHtml(profile.emergencyContactName ? profile.emergencyContactName + ' (' + (profile.emergencyContactPhone || '') + ')' : 'None')}</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="border: 2px solid #000; padding: 1rem;">
+          <h3 style="margin: 0 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; color: #1D4ED8;">Diagnosed Chronic Conditions</h3>
+          <p style="margin: 0; font-size: 0.9rem; font-weight: 700;">${escapeHtml((profile.conditions && profile.conditions.length > 0) ? profile.conditions.join(', ') : 'None documented')}</p>
+        </div>
+        <div style="border: 2px solid #000; padding: 1rem;">
+          <h3 style="margin: 0 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; color: #DC2626;">Known Allergies & Contraindications</h3>
+          <p style="margin: 0; font-size: 0.9rem; font-weight: 700;">${escapeHtml(profile.allergies || 'None documented')}</p>
+        </div>
+      </div>
+
+      <div style="border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; color: #059669;">Current Active Medications</h3>
+        <p style="margin: 0; font-size: 0.9rem; font-weight: 700;">${escapeHtml(profile.medications || 'None documented')}</p>
+      </div>
+
+      <div style="border: 3px solid #000; padding: 1.25rem; background: #FFFDF0; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0 0 0.5rem; font-size: 1.2rem; text-transform: uppercase; color: #000;">
+          Reported Symptoms & Triage Differential
+        </h2>
+        <div style="font-size: 0.95rem; line-height: 1.6; color: #111;">
+          ${cleanAdvice}
+        </div>
+      </div>
+
+      <div style="margin-top: 2rem; border-top: 2px dashed #000; padding-top: 1rem; display: flex; justify-content: space-between; font-size: 0.85rem; color: #4B5563;">
+        <div>Attending Physician Signature: ___________________________</div>
+        <div>Date: _________________</div>
+      </div>
+    </div>
+  `;
+
+  window.print();
+}
+
+/* ── 7. Global Keyboard Shortcuts ───────────────────── */
+function initKeyboardShortcuts() {
+  window.addEventListener('keydown', (e) => {
+    const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+    const isInput = activeTag === 'input' || activeTag === 'textarea' || document.activeElement?.isContentEditable;
+
+    if (e.key === 'Escape') {
+      const shortcutsModal = document.getElementById('keyboard-shortcuts-modal');
+      if (shortcutsModal && shortcutsModal.style.display !== 'none') {
+        shortcutsModal.style.display = 'none';
+        return;
+      }
+      const shareModal = document.getElementById('share-result-modal');
+      if (shareModal && shareModal.style.display !== 'none') {
+        shareModal.style.display = 'none';
+        return;
+      }
+      const customConfirm = document.getElementById('custom-confirm-modal');
+      if (customConfirm && customConfirm.style.display !== 'none') {
+        customConfirm.style.display = 'none';
+        return;
+      }
+      const fsOverlay = document.getElementById('screen-fullscreen-response');
+      if (fsOverlay && fsOverlay.style.display !== 'none') {
+        fsOverlay.style.display = 'none';
+        return;
+      }
+      if (isInput) {
+        document.activeElement.blur();
+      }
+      return;
+    }
+
+    if (isInput) return;
+
+    const key = e.key.toLowerCase();
+    if (key === 't') {
+      window.PageRouter?.navigateTo('page-triage');
+    } else if (key === 'p') {
+      window.PageRouter?.navigateTo('page-profile');
+    } else if (key === 'e') {
+      window.PageRouter?.navigateTo('page-encyclopedia');
+    } else if (key === 'a') {
+      window.PageRouter?.navigateTo('page-analytics');
+    } else if (key === 'r') {
+      window.PageRouter?.navigateTo('page-emergency');
+    } else if (key === 'm') {
+      window.PageRouter?.navigateTo('page-medication');
+    } else if (key === 's') {
+      window.PageRouter?.navigateTo('page-settings');
+    } else if (e.key === '/') {
+      e.preventDefault();
+      window.PageRouter?.navigateTo('page-encyclopedia');
+      setTimeout(() => {
+        const searchInput = document.getElementById('encyc-search-input');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+      }, 100);
+    } else if (key === 'd') {
+      const toggleBtn = document.querySelector('.theme-toggle-btn');
+      if (toggleBtn) toggleBtn.click();
+    } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+      const modal = document.getElementById('keyboard-shortcuts-modal');
+      if (modal) {
+        modal.style.display = (modal.style.display === 'none' || !modal.style.display) ? 'flex' : 'none';
+      }
+    } else if (key === 'n') {
+      e.preventDefault();
+      window.PageRouter?.navigateTo('page-triage');
+      setTimeout(() => {
+        document.getElementById('input-symptoms')?.focus();
+      }, 100);
+    }
+  });
+
+  const btnCopyShare = document.getElementById('btn-copy-share');
+  if (btnCopyShare) {
+    btnCopyShare.onclick = async () => {
+      const text = document.getElementById('share-result-text')?.value;
+      if (text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          btnCopyShare.textContent = '✓ Copied!';
+          setTimeout(() => { btnCopyShare.textContent = '📋 Copy to Clipboard'; }, 2000);
+        } catch (err) {
+          document.getElementById('share-result-text')?.select();
+          document.execCommand('copy');
+          btnCopyShare.textContent = '✓ Copied!';
+          setTimeout(() => { btnCopyShare.textContent = '📋 Copy to Clipboard'; }, 2000);
+        }
+      }
+    };
+  }
+}
+
+/* ── 8. Dark Mode Auto-Detect on First Load ──────────── */
+function initAutoTheme() {
+  const saved = localStorage.getItem('medisense_theme');
+  if (!saved) {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
+      toggleBtns.forEach(btn => {
+        const text = btn.querySelector('.theme-pill-text');
+        const cube = btn.querySelector('.theme-cube');
+        if (text) text.textContent = 'Broadway Night';
+        if (cube) { cube.textContent = '🌙'; cube.className = 'theme-cube moon'; }
+      });
+    }
+  }
+}
+
+/* ── 9. Hook into Profile & Medication Pages ─────────── */
+const _origProfileRender = ProfilePage?.render;
+if (_origProfileRender) {
+  ProfilePage.render = function(...args) {
+    const res = _origProfileRender.apply(this, args);
+    updateHealthRiskIndex();
+    updateBookmarkBadges();
+    return res;
+  };
+}
+
+const _origMedRender = MedicationPage?.render;
+if (_origMedRender) {
+  MedicationPage.render = function(...args) {
+    const res = _origMedRender.apply(this, args);
+    checkMedicationRefills();
+    initDrugInteractionChecker();
+    return res;
+  };
+}
+
+// Global exports
+window.getBookmarks = getBookmarks;
+window.saveBookmarks = saveBookmarks;
+window.updateBookmarkBadges = updateBookmarkBadges;
+window.updateHealthRiskIndex = updateHealthRiskIndex;
+window.initDrugInteractionChecker = initDrugInteractionChecker;
+window.checkMedicationRefills = checkMedicationRefills;
+window.openShareResultModal = openShareResultModal;
+window.generateDoctorIntakeNote = generateDoctorIntakeNote;
+
+// Initialize when document ready
+document.addEventListener('DOMContentLoaded', () => {
+  initKeyboardShortcuts();
+  initAutoTheme();
+  setTimeout(() => {
+    updateBookmarkBadges();
+    updateHealthRiskIndex();
+    checkMedicationRefills();
+    initDrugInteractionChecker();
+  }, 350);
 });
 
 // Attach globally

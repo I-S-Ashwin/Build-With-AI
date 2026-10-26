@@ -4108,3 +4108,289 @@ body {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   FEATURE SUITE 10-IN-1: ADVANCED POLISH & CLINICAL INTELLIGENCE
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 1. Keyboard Shortcuts Modal & Elements */
+.kb-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem 1.25rem;
+}
+@media (max-width: 600px) {
+  .kb-shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.kb-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed rgba(0,0,0,0.12);
+}
+[data-theme="dark"] .kb-shortcut-row {
+  border-bottom-color: rgba(255,255,255,0.12);
+}
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 0.45rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #111827;
+  background-color: #F3F4F6;
+  border: 2px solid #111827;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 #111827;
+  text-transform: uppercase;
+}
+[data-theme="dark"] kbd {
+  color: #FFD200;
+  background-color: #1F2937;
+  border-color: #FFD200;
+  box-shadow: 2px 2px 0 #FFD200;
+}
+
+/* 2. Health Risk Index Gauge & Card */
+.health-risk-card {
+  margin: 1.25rem 0;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 3px solid #1D4ED8;
+  box-shadow: 6px 6px 0 #1D4ED8;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.health-risk-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 #1D4ED8;
+}
+[data-theme="dark"] .health-risk-card {
+  background: linear-gradient(135deg, #0C2147 0%, #172554 100%);
+  border-color: #60A5FA;
+  box-shadow: 6px 6px 0 #1D4ED8;
+}
+.health-risk-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+.health-risk-left {
+  flex: 1;
+}
+.health-risk-label {
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #1D4ED8;
+}
+[data-theme="dark"] .health-risk-label {
+  color: #93C5FD;
+}
+.health-risk-score {
+  font-size: 2.5rem;
+  font-weight: 900;
+  line-height: 1.05;
+  margin: 0.25rem 0;
+  color: #111827;
+}
+[data-theme="dark"] .health-risk-score {
+  color: #F9FAFB;
+}
+.health-risk-sublabel {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #374151;
+}
+[data-theme="dark"] .health-risk-sublabel {
+  color: #D1D5DB;
+}
+.health-risk-gauge-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 3. Drug Interaction Checker */
+.drug-interaction-panel {
+  border: 3px solid #059669;
+  box-shadow: 6px 6px 0 #059669;
+  background: var(--bg-card);
+  overflow: hidden;
+}
+[data-theme="dark"] .drug-interaction-panel {
+  border-color: #34D399;
+  box-shadow: 6px 6px 0 #065F46;
+}
+.drug-interaction-header {
+  background: #059669;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.6rem 0.85rem;
+}
+[data-theme="dark"] .drug-interaction-header {
+  background: #065F46;
+}
+#drug-interaction-result {
+  margin-top: 0.5rem;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+}
+.interaction-danger {
+  background: #FEE2E2 !important;
+  border-color: #DC2626 !important;
+  color: #991B1B !important;
+  box-shadow: 4px 4px 0 #DC2626 !important;
+}
+[data-theme="dark"] .interaction-danger {
+  background: #450A0A !important;
+  border-color: #F87171 !important;
+  color: #FCA5A5 !important;
+}
+.interaction-warning {
+  background: #FEF3C7 !important;
+  border-color: #D97706 !important;
+  color: #92400E !important;
+  box-shadow: 4px 4px 0 #D97706 !important;
+}
+[data-theme="dark"] .interaction-warning {
+  background: #451A03 !important;
+  border-color: #FBBF24 !important;
+  color: #FDE68A !important;
+}
+.interaction-safe {
+  background: #ECFDF5 !important;
+  border-color: #059669 !important;
+  color: #065F46 !important;
+  box-shadow: 4px 4px 0 #059669 !important;
+}
+[data-theme="dark"] .interaction-safe {
+  background: #064E3B !important;
+  border-color: #34D399 !important;
+  color: #A7F3D0 !important;
+}
+
+/* 4. Refill Alerts & Pulse */
+.refill-alert-badge {
+  background: #FEF3C7;
+  color: #92400E;
+  border: 2px solid #D97706;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 0.2rem 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 2px 2px 0 #D97706;
+  animation: refillPulse 2.2s infinite ease-in-out;
+}
+@keyframes refillPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 3px 3px 0 #D97706, 0 0 8px rgba(217,119,6,0.3); }
+}
+
+/* 5. Bookmarks in Disease Cards */
+.encyc-card {
+  position: relative;
+}
+.encyc-card-bookmark-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--mondrian-black);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  cursor: pointer;
+  z-index: 4;
+  box-shadow: 2px 2px 0 var(--mondrian-black);
+  transition: all 0.15s ease;
+}
+.encyc-card-bookmark-btn:hover {
+  transform: scale(1.2) rotate(8deg);
+  background: #FFD200;
+}
+.encyc-card-bookmark-btn.bookmarked {
+  background: #FFD200;
+  color: #B45309;
+}
+[data-theme="dark"] .encyc-card-bookmark-btn {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #FFD200;
+  box-shadow: 2px 2px 0 #FFD200;
+}
+
+/* 6. Symptom Recurrence Context Banner */
+.symptom-history-banner {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border: 2px solid #D97706;
+  border-left: 6px solid #D97706;
+  color: #78350F;
+  padding: 0.65rem 0.9rem;
+  margin: 0.5rem 0 0.85rem 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.45;
+  box-shadow: 3px 3px 0 #D97706;
+}
+[data-theme="dark"] .symptom-history-banner {
+  background: linear-gradient(135deg, #351C05 0%, #451A03 100%);
+  border-color: #F59E0B;
+  color: #FDE68A;
+  box-shadow: 3px 3px 0 #B45309;
+}
+
+/* 7. Printable Doctor Intake Note */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #doctor-print-container,
+  #doctor-print-container * {
+    visibility: visible;
+  }
+  #doctor-print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 2cm;
+    font-family: Arial, sans-serif;
+    color: #000;
+    background: #fff;
+    display: block !important;
+  }
+}
+
+.doctor-note-box {
+  background: #FFFFFF;
+  border: 3px solid #111827;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 6px 6px 0 #111827;
+}
+[data-theme="dark"] .doctor-note-box {
+  background: #1F2937;
+  border-color: #60A5FA;
+  box-shadow: 6px 6px 0 #1D4ED8;
+}
