@@ -161,6 +161,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Demo mode: bypass login entirely — enters as "Demo Patient"
+  function enterDemoMode() {
+    const user = window.Storage ? window.Storage.setUser('Demo Patient') : { username: 'Demo Patient' };
+    if (userDisplayBadge) userDisplayBadge.textContent = user.username;
+    showScreen(screenApp);
+  }
+
+  const btnDemoLogin = document.getElementById('btn-demo-login');
+  if (btnDemoLogin) btnDemoLogin.addEventListener('click', enterDemoMode);
+
+  const btnDemoHeader = document.getElementById('btn-demo-header');
+  if (btnDemoHeader) btnDemoHeader.addEventListener('click', enterDemoMode);
+
   if (formLogin) {
     formLogin.addEventListener('submit', (e) => {
       e.preventDefault();

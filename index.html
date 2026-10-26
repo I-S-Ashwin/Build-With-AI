@@ -38,6 +38,7 @@
       </div>
       <div style="display: flex; gap: 0.75rem; align-items: center;">
         <button class="btn btn-theme-toggle theme-toggle-btn" aria-label="Toggle theme">🌙 Dark</button>
+        <button id="btn-demo-header" class="btn btn-secondary">⚡ Try Demo</button>
         <button id="btn-preview-login" class="btn btn-primary">Log In &rarr;</button>
       </div>
     </header>
@@ -49,9 +50,14 @@
           Skip the clinic waiting room for familiar colds, minor scrapes, and routine ailments. 
           MediSense listens to your symptoms, asks careful follow-ups, and tells you whether to treat at home or see a doctor immediately.
         </p>
-        <button onclick="document.getElementById('btn-preview-login').click()" class="btn btn-primary" style="font-size: 1.15rem; padding: 1rem 2.25rem;">
-          Start Consultation
-        </button>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+          <button onclick="document.getElementById('btn-demo-login').click()" class="btn btn-primary" style="font-size: 1.15rem; padding: 1rem 2.25rem;">
+            ⚡ Try Demo — No Login
+          </button>
+          <button onclick="document.getElementById('btn-preview-login').click()" class="btn btn-secondary" style="font-size: 1.05rem; padding: 1rem 2rem;">
+            Log In →
+          </button>
+        </div>
       </div>
 
       <div class="preview-card-grid">
@@ -97,6 +103,14 @@
         <div class="form-actions">
           <button type="button" id="btn-login-back" class="btn btn-secondary">&larr; Back</button>
           <button type="submit" class="btn btn-primary">Enter MediSense</button>
+        </div>
+        <div style="margin-top: 0.75rem; border-top: 2px solid var(--color-black); padding-top: 0.75rem;">
+          <button type="button" id="btn-demo-login" class="btn btn-secondary" style="width: 100%; font-size: 0.95rem;">
+            ⚡ Try Demo Instantly (No Login Required) →
+          </button>
+          <p style="font-size: 0.78rem; color: var(--color-text-muted, #666); margin-top: 0.4rem; text-align: center;">
+            Enters as "Demo Patient" — all features unlocked
+          </p>
         </div>
       </form>
     </div>
