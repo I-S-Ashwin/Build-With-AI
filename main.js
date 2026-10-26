@@ -16,25 +16,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLogout = document.getElementById('btn-logout');
   const userDisplayBadge = document.getElementById('user-display-name');
 
-  // 1. Initialize Theme from Storage
-  const savedTheme = window.Storage ? window.Storage.getTheme() : 'light';
-  applyTheme(savedTheme);
-
+  // 1. Robust Broadway Theme Engine (Light / Dark)
   function applyTheme(theme) {
+    const isDark = (theme === 'dark');
+    document.documentElement.setAttribute('data-theme', theme);
     document.body.setAttribute('data-theme', theme);
     if (window.Storage) window.Storage.setTheme(theme);
-    btnThemeToggle.forEach(btn => {
-      btn.innerHTML = theme === 'dark' 
+
+    const allButtons = document.querySelectorAll('.theme-toggle-btn');
+    allButtons.forEach(btn => {
+      btn.innerHTML = isDark
         ? '<span class="theme-pill-track"><span class="theme-cube sun">☀️</span></span><span class="theme-pill-text">Broadway Day</span>'
         : '<span class="theme-pill-track"><span class="theme-cube moon">🌙</span></span><span class="theme-pill-text">Broadway Night</span>';
     });
   }
+  window.applyTheme = applyTheme;
 
-  btnThemeToggle.forEach(btn => {
-    btn.addEventListener('click', () => {
+  // Initialize theme from storage, or auto-detect system preference
+  const savedTheme = window.Storage ? window.Storage.getTheme() : null;
+  if (savedTheme) {
+    applyTheme(savedTheme);
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+  }
+
+  // Delegated click handler: toggles theme for ALL buttons across the entire app
+  document.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('.theme-toggle-btn');
+    if (toggleBtn) {
       const current = document.body.getAttribute('data-theme') || 'light';
-      applyTheme(current === 'dark' ? 'light' : 'dark');
-    });
+      const next = (current === 'dark') ? 'light' : 'dark';
+      applyTheme(next);
+    }
   });
 
   // 2. Web Audio Sound Engine (Chime, Tactile Clicks, & Whoosh)
@@ -366,15 +380,16 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         };
 
+        const bubbleResult = { text, outcome };
         btnShare.onclick = () => {
           if (window.openShareResultModal) {
-            window.openShareResultModal(window.currentTriageOutcome);
+            window.openShareResultModal(bubbleResult);
           }
         };
 
         btnDoctor.onclick = () => {
           if (window.generateDoctorIntakeNote) {
-            window.generateDoctorIntakeNote(window.currentTriageOutcome);
+            window.generateDoctorIntakeNote(bubbleResult);
           }
         };
 

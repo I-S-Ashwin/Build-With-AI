@@ -1603,31 +1603,54 @@ function checkMedicationRefills() {
   }
 }
 
-/* ── 5. Share Triage Result Modal ───────────────────── */
+/* ── 5. Share Triage Assessment Modal ───────────────── */
 function openShareResultModal(outcome) {
-  const result = outcome || window.currentTriageOutcome;
-  const textArea = document.getElementById('share-result-text');
   const modal = document.getElementById('share-result-modal');
-  if (!textArea || !modal) return;
+  const textArea = document.getElementById('share-result-text');
+  if (!modal || !textArea) return;
 
-  const rawText = result ? (result.text || '') : '';
-  const cleanText = rawText.replace(/\[DIAGNOSIS_[A-Z]+\]/g, '').trim();
-  const verdict = (result && result.outcome === 'see-doctor') ? '⚠️ Clinical Examination Directed' : '🌿 Safe Routine Home Care';
+  let result = outcome || window.currentTriageOutcome;
+
+  // Fallback to most recent session from storage if no active outcome
+  if (!result && window.Storage) {
+    const sessions = window.Storage.getSessions();
+    if (sessions && sessions.length > 0) {
+      result = sessions[0];
+    }
+  }
 
   const dateStr = new Date().toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 
-  const formattedShare = `🏥 MediSense Healthcare Triage Assessment
+  if (result && (result.text || result.summary || result.advice || result.userQuery)) {
+    const rawText = result.text || result.summary || result.advice || '';
+    const cleanText = rawText.replace(/\[DIAGNOSIS_[A-Z]+\]/g, '').trim();
+    const isDoctor = (result.outcome === 'see-doctor' || (result.verdict && result.verdict.toLowerCase().includes('doctor')));
+    const verdict = isDoctor ? '⚠️ Clinical Physician Referral Recommended' : '🌿 Safe Routine Home Care';
+
+    textArea.value = `🏥 MediSense Healthcare Triage Assessment
 📅 Date: ${dateStr}
 Verdict: ${verdict}
 --------------------------------------------------
 ${cleanText}
 --------------------------------------------------
 🔒 Assessed with MediSense offline clinical knowledge base.`;
+  } else {
+    textArea.value = `🏥 MediSense Healthcare Triage Assessment
+📅 Date: ${dateStr}
 
-  textArea.value = formattedShare;
+No active consultation recorded yet.
+
+Type or speak your symptoms in Triage Chat to generate a personalized clinical assessment.`;
+  }
+
   modal.style.display = 'flex';
+
+  // Backdrop click to dismiss
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  };
 }
 
 /* ── 6. Printable Doctor Intake Note ────────────────── */
@@ -1637,18 +1660,24 @@ function generateDoctorIntakeNote(outcome) {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 
-  const rawText = outcome ? (outcome.text || '') : (window.currentTriageOutcome ? window.currentTriageOutcome.text : 'Patient self-reported health intake.');
+  let result = outcome || window.currentTriageOutcome;
+  if (!result && window.Storage) {
+    const sessions = window.Storage.getSessions();
+    if (sessions && sessions.length > 0) result = sessions[0];
+  }
+
+  const rawText = result ? (result.text || result.summary || result.advice || '') : 'Patient self-reported health intake.';
   const cleanAdvice = rawText.replace(/\[DIAGNOSIS_[A-Z]+\]/g, '').trim();
 
   const printDiv = document.getElementById('doctor-print-container');
   if (!printDiv) return;
 
   printDiv.innerHTML = `
-    <div class="doctor-note-box">
+    <div class="doctor-note-box" style="border: 3px solid #000; padding: 1.75rem; background: #fff; color: #000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
       <div style="border-bottom: 3px solid #000; padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
-          <h1 style="margin: 0; font-size: 1.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">MediSense Clinical Intake Summary</h1>
-          <p style="margin: 0.35rem 0 0; font-size: 0.95rem; color: #4B5563;">Confidential Patient-Reported Triage & Health Baseline Record</p>
+          <h1 style="margin: 0; font-size: 1.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #000;">MediSense Clinical Intake Summary</h1>
+          <p style="margin: 0.35rem 0 0; font-size: 0.95rem; color: #4B5563;">Confidential Patient-Reported Triage &amp; Health Baseline Record</p>
         </div>
         <div style="text-align: right; font-size: 0.85rem; font-weight: 700; color: #4B5563;">
           <div>Generated: ${dateStr}</div>
@@ -1659,11 +1688,11 @@ function generateDoctorIntakeNote(outcome) {
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: #F3F4F6; padding: 1rem; border: 2px solid #000; margin-bottom: 1.5rem;">
         <div>
           <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Patient Name</div>
-          <div style="font-size: 1.1rem; font-weight: 800;">${escapeHtml(profile.name || 'Unspecified')}</div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #000;">${escapeHtml(profile.name || 'Unspecified')}</div>
         </div>
         <div>
           <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Age / Biological Sex</div>
-          <div style="font-size: 1.1rem; font-weight: 800;">${profile.age ? profile.age + ' yrs' : '—'} / ${escapeHtml(profile.gender || '—')}</div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #000;">${profile.age ? profile.age + ' yrs' : '—'} / ${escapeHtml(profile.gender || '—')}</div>
         </div>
         <div>
           <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Blood Group</div>
@@ -1671,32 +1700,32 @@ function generateDoctorIntakeNote(outcome) {
         </div>
         <div>
           <div style="font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: #6B7280;">Emergency Contact</div>
-          <div style="font-size: 0.95rem; font-weight: 800;">${escapeHtml(profile.emergencyContactName ? profile.emergencyContactName + ' (' + (profile.emergencyContactPhone || '') + ')' : 'None')}</div>
+          <div style="font-size: 0.95rem; font-weight: 800; color: #000;">${escapeHtml(profile.emergencyContactName ? profile.emergencyContactName + ' (' + (profile.emergencyContactPhone || '') + ')' : 'None')}</div>
         </div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
         <div style="border: 2px solid #000; padding: 1rem;">
           <h3 style="margin: 0 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; color: #1D4ED8;">Diagnosed Chronic Conditions</h3>
-          <p style="margin: 0; font-size: 0.9rem; font-weight: 700;">${escapeHtml((profile.conditions && profile.conditions.length > 0) ? profile.conditions.join(', ') : 'None documented')}</p>
+          <p style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #000;">${escapeHtml((profile.conditions && profile.conditions.length > 0) ? profile.conditions.join(', ') : 'None documented')}</p>
         </div>
         <div style="border: 2px solid #000; padding: 1rem;">
-          <h3 style="margin: 0 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; color: #DC2626;">Known Allergies & Contraindications</h3>
-          <p style="margin: 0; font-size: 0.9rem; font-weight: 700;">${escapeHtml(profile.allergies || 'None documented')}</p>
+          <h3 style="margin: 0 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; color: #DC2626;">Known Allergies &amp; Contraindications</h3>
+          <p style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #000;">${escapeHtml(profile.allergies || 'None documented')}</p>
         </div>
       </div>
 
       <div style="border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
         <h3 style="margin: 0 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; color: #059669;">Current Active Medications</h3>
-        <p style="margin: 0; font-size: 0.9rem; font-weight: 700;">${escapeHtml(profile.medications || 'None documented')}</p>
+        <p style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #000;">${escapeHtml(profile.medications || 'None documented')}</p>
       </div>
 
       <div style="border: 3px solid #000; padding: 1.25rem; background: #FFFDF0; margin-bottom: 1.5rem;">
         <h2 style="margin: 0 0 0.5rem; font-size: 1.2rem; text-transform: uppercase; color: #000;">
-          Reported Symptoms & Triage Differential
+          Reported Symptoms &amp; Triage Differential
         </h2>
         <div style="font-size: 0.95rem; line-height: 1.6; color: #111;">
-          ${cleanAdvice}
+          ${cleanAdvice.replace(/\n/g, '<br>')}
         </div>
       </div>
 
@@ -1707,8 +1736,68 @@ function generateDoctorIntakeNote(outcome) {
     </div>
   `;
 
-  window.print();
+  document.body.classList.remove('printing-ice-card');
+  document.body.classList.add('printing-doctor-note');
+
+  setTimeout(() => {
+    window.print();
+  }, 100);
 }
+
+/* ── 6b. Printable ICE Medical Wallet Card ──────────── */
+function printICECard() {
+  const profile = (window.Storage && window.Storage.getProfile()) || {};
+  const printDiv = document.getElementById('ice-print-container');
+  if (!printDiv) return;
+
+  const name = profile.name || document.getElementById('profile-name')?.value || 'Patient';
+  const age = profile.age || document.getElementById('profile-age')?.value || '—';
+  const blood = profile.bloodType || document.getElementById('profile-blood')?.value || 'Unknown';
+  const allergies = profile.allergies || document.getElementById('profile-allergies')?.value || 'None known';
+  const meds = profile.medications || document.getElementById('profile-medications')?.value || 'None';
+  const ecName = profile.emergencyContactName || document.getElementById('profile-emergency-name')?.value || 'Not specified';
+  const ecPhone = profile.emergencyContactPhone || document.getElementById('profile-emergency-phone')?.value || '—';
+  const conds = (profile.conditions && profile.conditions.length > 0)
+    ? profile.conditions.join(', ')
+    : (Array.from(document.querySelectorAll('.profile-cond-check:checked')).map(c => c.value).join(', ') || 'None reported');
+
+  printDiv.innerHTML = `
+    <div style="width: 8.6cm; height: 5.4cm; border: 3px solid #DC2626; box-shadow: 4px 4px 0 #DC2626; padding: 0.5cm; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #FFF5F5; color: #111; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; page-break-inside: avoid;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #DC2626; padding-bottom: 0.2cm;">
+        <div style="font-size: 12pt; font-weight: 900; color: #DC2626; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 4px;">
+          <span>🆘</span> MEDICAL EMERGENCY ID
+        </div>
+        <div style="font-size: 11pt; font-weight: 900; background: #DC2626; color: #fff; padding: 2px 7px;">
+          ${escapeHtml(blood)}
+        </div>
+      </div>
+
+      <div style="font-size: 8.5pt; line-height: 1.35; margin: 0.2cm 0;">
+        <div><strong>NAME:</strong> ${escapeHtml(name)} (${age} yrs)</div>
+        <div><strong>CONDITIONS:</strong> ${escapeHtml(conds)}</div>
+        <div><strong>ALLERGIES:</strong> <span style="color:#DC2626;font-weight:900;">${escapeHtml(allergies)}</span></div>
+        <div><strong>MEDS:</strong> ${escapeHtml(meds)}</div>
+      </div>
+
+      <div style="border-top: 1.5px dashed #DC2626; padding-top: 0.15cm; font-size: 8pt; display: flex; justify-content: space-between; align-items: center;">
+        <div><strong>ICE CONTACT:</strong> ${escapeHtml(ecName)}</div>
+        <div style="font-weight: 900; color: #1D4ED8;">📞 ${escapeHtml(ecPhone)}</div>
+      </div>
+    </div>
+  `;
+
+  document.body.classList.remove('printing-doctor-note');
+  document.body.classList.add('printing-ice-card');
+
+  setTimeout(() => {
+    window.print();
+  }, 100);
+}
+
+// Global print cleanup listeners
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('printing-doctor-note', 'printing-ice-card');
+});
 
 /* ── 7. Global Keyboard Shortcuts ───────────────────── */
 function initKeyboardShortcuts() {
@@ -1771,8 +1860,11 @@ function initKeyboardShortcuts() {
         }
       }, 100);
     } else if (key === 'd') {
-      const toggleBtn = document.querySelector('.theme-toggle-btn');
-      if (toggleBtn) toggleBtn.click();
+      const current = document.body.getAttribute('data-theme') || 'light';
+      const next = (current === 'dark') ? 'light' : 'dark';
+      if (typeof window.applyTheme === 'function') {
+        window.applyTheme(next);
+      }
     } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
       const modal = document.getElementById('keyboard-shortcuts-modal');
       if (modal) {
@@ -1854,6 +1946,7 @@ window.initDrugInteractionChecker = initDrugInteractionChecker;
 window.checkMedicationRefills = checkMedicationRefills;
 window.openShareResultModal = openShareResultModal;
 window.generateDoctorIntakeNote = generateDoctorIntakeNote;
+window.printICECard = printICECard;
 
 // Initialize when document ready
 document.addEventListener('DOMContentLoaded', () => {
