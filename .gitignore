@@ -7,3 +7,9 @@ devpost/learner-profile.md
 # Allow a secret-free example
 !.env.example
 config.js
+
+# Agent tooling scaffolding and lockfiles
+.agents/
+.claude/
+agent/
+skills-lock.json
