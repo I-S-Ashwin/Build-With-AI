@@ -1,5 +1,9 @@
 # 🏥 MediSense — Personal Healthcare Triage Assistant
 
+<p align="center">
+  <img src="assets/medisense-logo.jpg" alt="MediSense Logo" width="300" style="border: 3px solid #111; box-shadow: 6px 6px 0px #111; border-radius: 8px;">
+</p>
+
 > **A Broadway Boogie-Woogie & Piet Mondrian inspired, offline-first personal healthcare triage web app that listens to your symptoms, guides your care decisions, and keeps your health data entirely private.**
 
 Built for the **Build With AI: Basics** Devpost Hackathon.
