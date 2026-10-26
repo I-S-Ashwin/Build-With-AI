@@ -62,7 +62,7 @@ Build mode: learn
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — Slice 2 (Testing the core Gemini triage chat loop)
-- [ ] Final kick-the-tires exploration and feedback completed
+- [x] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
 
@@ -71,19 +71,20 @@ Build mode: learn
 - [x] Add tactile Web Audio sound effects for UI clicks and paper-throw save
 - [x] Add 116-disease clinical knowledge base from Kaggle dataset for 100% offline triage
 - [x] Add 6 integrated pages (Profile, Encyclopedia, Analytics, Emergency Guide, Medication Log, Settings) & Mondrian navigation
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: 
-Route and stops: 
-Edit outcome: 
-Reflection: 
-Activity mode: 
+Activity and evidence: Verified comprehensive offline healthcare triage web app with Piet Mondrian & Broadway Boogie-Woogie visual aesthetic, voice input, 116-condition offline encyclopedia, drug interaction checker, CPR metronome, ICE emergency card printing, doctor intake note printing, session PDF export, and multi-theme light/dark mode.
+Route and stops: Index Shell -> Live Voice/Text Triage -> Clinical NLP & Offline KB -> Subpages (Profile, Encyclopedia, Analytics, Meds, ICE Guide, Settings) -> Chat Bin & Session Export.
+Edit outcome: Fixed chat bin modal viewport clamping, pinned sticky header with close button, enabled multi-way dismiss (X button, Close button, Escape key, and backdrop click).
+Reflection: Built a resilient offline-first application that balances artistic neo-brutalist aesthetics with mission-critical clinical utility.
+Activity mode: learn
+
 
 ## Revisions
 
