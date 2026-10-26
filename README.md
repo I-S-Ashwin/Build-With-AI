@@ -69,8 +69,8 @@ MediSense is engineered with **zero external dependencies** and requires **zero 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/<your-username>/Build_With_AI_Basics.git
-   cd Build_With_AI_Basics
+   git clone https://github.com/I-S-Ashwin/Build-With-AI.git
+   cd Build-With-AI
    ```
 
 2. **Start the local HTTP server:**

@@ -51,6 +51,6 @@ Use these factual notes about your project when writing your own submission copy
 
 ## 🔗 Links to Record
 
-- **GitHub Repository**: 
+- **GitHub Repository**: https://github.com/I-S-Ashwin/Build-With-AI
 - **Demo Video URL**: 
 - **Live Demo (Optional)**: http://localhost:3000
