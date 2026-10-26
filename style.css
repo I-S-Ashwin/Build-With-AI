@@ -3,16 +3,41 @@
 :root {
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   
-  /* Piet Mondrian & Broadway Boogie-Woogie (1942-1943) Palette */
+  /* Vibrant Broadway Boogie-Woogie (1942-1943) Modern Palette */
   --boogie-yellow: #FFD200;
-  --boogie-cadmium: #FFE259;
-  --boogie-red: #D9232A;
-  --boogie-blue: #1554A8;
+  --boogie-cadmium: #FFE066;
+  --boogie-red: #EF233C;
+  --boogie-blue: #1D4ED8;
+  --boogie-cobalt: #2563EB;
   --boogie-white: #FFFFFF;
   --boogie-gray: #D8DCE0;
-  --boogie-black: #111111;
+  --boogie-black: #0F1115;
   
-  /* Broadway Boogie-Woogie Syncopated Track Patterns */
+  /* Piet Mondrian Pure Primaries */
+  --mondrian-red: #EF233C;
+  --mondrian-blue: #1D4ED8;
+  --mondrian-yellow: #FFD200;
+  --mondrian-accent-yellow: #FFE566;
+  --mondrian-black: #0F1115;
+  --mondrian-white: #FFFFFF;
+  --mondrian-offwhite: #FFFDF5;
+  --mondrian-gray-light: #FFF9E6;
+  --mondrian-gray-mid: #5A626A;
+
+  /* Theme-specific tokens: Default (Light - Warm Canvas) */
+  --bg-app: #FFFDF5;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #FFF9E6;
+  --text-main: #0F1115;
+  --text-muted: #4B5563;
+  --border-thick: 3px solid #0F1115;
+  --border-medium: 2px solid #0F1115;
+  --border-thin: 1px solid #0F1115;
+  --shadow-block: 3px 3px 0px #0F1115;
+  --shadow-block-lg: 5px 5px 0px #0F1115;
+  --shadow-block-hover: 1px 1px 0px #0F1115;
+
+  /* Broadway Boogie-Woogie Syncopated Track Pattern */
   --boogie-track-h: repeating-linear-gradient(
     90deg,
     var(--boogie-yellow) 0px,
@@ -40,51 +65,34 @@
     var(--boogie-yellow) 152px,
     var(--boogie-yellow) 168px
   );
-
-  /* Piet Mondrian Palette */
-  --mondrian-red: #D62828;
-  --mondrian-blue: #003049;
-  --mondrian-yellow: #F77F00;
-  --mondrian-accent-yellow: #FCBF49;
-  --mondrian-black: #111111;
-  --mondrian-white: #FFFFFF;
-  --mondrian-offwhite: #F8F9FA;
-  --mondrian-gray-light: #E9ECEF;
-  --mondrian-gray-mid: #6C757D;
-  
-  /* Theme-specific tokens: Default (Light) */
-  --bg-app: var(--mondrian-offwhite);
-  --bg-surface: var(--mondrian-white);
-  --bg-subtle: #F1F3F5;
-  --text-main: var(--mondrian-black);
-  --text-muted: #495057;
-  --border-thick: 4px solid var(--mondrian-black);
-  --border-medium: 3px solid var(--mondrian-black);
-  --border-thin: 1px solid var(--mondrian-black);
-  --shadow-block: 4px 4px 0px var(--mondrian-black);
-  --shadow-block-lg: 6px 6px 0px var(--mondrian-black);
-  --shadow-block-hover: 2px 2px 0px var(--mondrian-black);
 }
 
 [data-theme="dark"] {
-  --bg-app: #121212;
+  /* Broadway Neon Nights (Dark Mode) */
+  --bg-app: #0A0E17;
+  --bg-surface: #131B2E;
+  --bg-subtle: #1A243B;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --mondrian-black: #0F1115;
+  --mondrian-white: #F8FAFC;
+  --mondrian-red: #FF3B3F;
+  --mondrian-blue: #38BDF8;
+  --mondrian-yellow: #FFDC33;
+  --mondrian-accent-yellow: #FFE866;
+  --mondrian-gray-light: #1A243B;
   --boogie-yellow: #FFDC33;
   --boogie-cadmium: #FFE866;
   --boogie-red: #FF3B3F;
-  --boogie-blue: #2A75D3;
-  --boogie-white: #E6EDF2;
-  --boogie-gray: #3A444E;
-  --bg-surface: #1E1E1E;
-  --bg-subtle: #282828;
-  --text-main: #F8F9FA;
-  --text-muted: #ADB5BD;
-  --border-thick: 4px solid #333333;
-  --border-medium: 3px solid #333333;
-  --border-thin: 1px solid #444444;
-  --shadow-block: 4px 4px 0px #000000;
-  --shadow-block-lg: 6px 6px 0px #000000;
-  --shadow-block-hover: 2px 2px 0px #000000;
-  --mondrian-gray-light: #2A2A2A;
+  --boogie-blue: #38BDF8;
+  --boogie-white: #F8FAFC;
+  --boogie-gray: #334155;
+  --border-thick: 3px solid #0F1115;
+  --border-medium: 2px solid #0F1115;
+  --border-thin: 1px solid rgba(255, 255, 255, 0.15);
+  --shadow-block: 3px 3px 0px #000000;
+  --shadow-block-lg: 5px 5px 0px #000000;
+  --shadow-block-hover: 1px 1px 0px #000000;
 }
 
 * {
@@ -2527,4 +2535,205 @@ body {
 }
 .heatmap-tile:hover {
   box-shadow: 2px 2px 0 var(--boogie-yellow), 4px 4px 0 var(--mondrian-black);
+}
+
+
+/* Modern Broadway Boogie Theme Toggle Button */
+.btn-theme-toggle {
+  background: var(--boogie-yellow) !important;
+  color: #0F1115 !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 2px 2px 0 var(--mondrian-red), 4px 4px 0 #0F1115 !important;
+  padding: 0.45rem 1rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 900 !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  cursor: pointer !important;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2), box-shadow 0.15s cubic-bezier(0.2, 0.8, 0.4, 1.2), background 0.15s ease !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase !important;
+  user-select: none !important;
+}
+
+.btn-theme-toggle:hover {
+  transform: translate(1px, 1px) scale(1.03) !important;
+  box-shadow: 1px 1px 0 var(--mondrian-red), 2px 2px 0 #0F1115 !important;
+  background: var(--boogie-cadmium) !important;
+}
+
+[data-theme="dark"] .btn-theme-toggle {
+  background: #1E293B !important;
+  color: #FFDC33 !important;
+  border: 3px solid #FFDC33 !important;
+  box-shadow: 0 0 12px rgba(255, 220, 51, 0.35), 2px 2px 0 #38BDF8, 4px 4px 0 #000 !important;
+}
+
+[data-theme="dark"] .btn-theme-toggle:hover {
+  background: #27354D !important;
+  box-shadow: 0 0 16px rgba(255, 220, 51, 0.5), 1px 1px 0 #38BDF8, 2px 2px 0 #000 !important;
+}
+
+.theme-pill-track {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  border: 2px solid #0F1115;
+  font-size: 0.8rem;
+  box-shadow: inset 1px 1px 0 rgba(0,0,0,0.1);
+  transition: transform 0.25s ease;
+}
+
+.btn-theme-toggle:hover .theme-pill-track {
+  transform: rotate(20deg) scale(1.1);
+}
+
+[data-theme="dark"] .theme-pill-track {
+  background: #0F172A;
+  border-color: #FFDC33;
+}
+
+.theme-pill-text {
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PER-PAGE SIGNATURE BROADWAY COLORS
+   ═══════════════════════════════════════════════════════════════ */
+
+.nav-tab-btn[data-page="page-triage"] {
+  --tab-accent: #FFD200;
+  --tab-active-bg: #FFF9D2;
+  --tab-icon-color: #D97706;
+}
+.nav-tab-btn[data-page="page-profile"] {
+  --tab-accent: #1D4ED8;
+  --tab-active-bg: #EFF6FF;
+  --tab-icon-color: #1D4ED8;
+}
+.nav-tab-btn[data-page="page-encyclopedia"] {
+  --tab-accent: #EF233C;
+  --tab-active-bg: #FEF2F2;
+  --tab-icon-color: #DC2626;
+}
+.nav-tab-btn[data-page="page-analytics"] {
+  --tab-accent: #F59E0B;
+  --tab-active-bg: #FFFBEB;
+  --tab-icon-color: #D97706;
+}
+.nav-tab-btn[data-page="page-emergency"] {
+  --tab-accent: #DC2626;
+  --tab-active-bg: #FEE2E2;
+  --tab-icon-color: #B91C1C;
+}
+.nav-tab-btn[data-page="page-medication"] {
+  --tab-accent: #10B981;
+  --tab-active-bg: #ECFDF5;
+  --tab-icon-color: #059669;
+}
+.nav-tab-btn[data-page="page-settings"] {
+  --tab-accent: #8B5CF6;
+  --tab-active-bg: #F5F3FF;
+  --tab-icon-color: #7C3AED;
+}
+
+[data-theme="dark"] .nav-tab-btn[data-page="page-triage"] { --tab-active-bg: #2B2404; --tab-icon-color: #FCD34D; }
+[data-theme="dark"] .nav-tab-btn[data-page="page-profile"] { --tab-active-bg: #0C2147; --tab-icon-color: #60A5FA; }
+[data-theme="dark"] .nav-tab-btn[data-page="page-encyclopedia"] { --tab-active-bg: #380D11; --tab-icon-color: #F87171; }
+[data-theme="dark"] .nav-tab-btn[data-page="page-analytics"] { --tab-active-bg: #351C05; --tab-icon-color: #FBBF24; }
+[data-theme="dark"] .nav-tab-btn[data-page="page-emergency"] { --tab-active-bg: #3D0A0E; --tab-icon-color: #FCA5A5; }
+[data-theme="dark"] .nav-tab-btn[data-page="page-medication"] { --tab-active-bg: #062E20; --tab-icon-color: #34D399; }
+[data-theme="dark"] .nav-tab-btn[data-page="page-settings"] { --tab-active-bg: #221545; --tab-icon-color: #C4B5FD; }
+
+.nav-tab-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--tab-accent);
+  border-left: 1px solid var(--mondrian-black);
+  border-bottom: 1px solid var(--mondrian-black);
+}
+
+.nav-tab-btn:hover {
+  background-color: var(--tab-active-bg) !important;
+}
+
+.nav-tab-btn.active {
+  background-color: var(--tab-active-bg) !important;
+  box-shadow: inset 0 4px 0 var(--tab-accent) !important;
+}
+
+.nav-tab-btn.active .nav-tab-icon {
+  transform: scale(1.18);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* Symptom Quick-Chips distinct vibrant colors */
+.symptom-chip:nth-child(1) {
+  background-color: #FEF3C7 !important;
+  border: 2px solid #F59E0B !important;
+  color: #92400E !important;
+  box-shadow: 2px 2px 0 #F59E0B, 4px 4px 0 #0F1115 !important;
+}
+.symptom-chip:nth-child(2) {
+  background-color: #E0F2FE !important;
+  border: 2px solid #0284C7 !important;
+  color: #0369A1 !important;
+  box-shadow: 2px 2px 0 #0284C7, 4px 4px 0 #0F1115 !important;
+}
+.symptom-chip:nth-child(3) {
+  background-color: #FEE2E2 !important;
+  border: 2px solid #EF4444 !important;
+  color: #991B1B !important;
+  box-shadow: 2px 2px 0 #EF4444, 4px 4px 0 #0F1115 !important;
+}
+
+[data-theme="dark"] .symptom-chip:nth-child(1) {
+  background-color: #2D2305 !important;
+  border: 2px solid #FCD34D !important;
+  color: #FDE68A !important;
+  box-shadow: 2px 2px 0 #F59E0B, 4px 4px 0 #000 !important;
+}
+[data-theme="dark"] .symptom-chip:nth-child(2) {
+  background-color: #082F49 !important;
+  border: 2px solid #38BDF8 !important;
+  color: #BAE6FD !important;
+  box-shadow: 2px 2px 0 #0284C7, 4px 4px 0 #000 !important;
+}
+[data-theme="dark"] .symptom-chip:nth-child(3) {
+  background-color: #450A0A !important;
+  border: 2px solid #F87171 !important;
+  color: #FECACA !important;
+  box-shadow: 2px 2px 0 #EF4444, 4px 4px 0 #000 !important;
+}
+
+/* User chat bubble warm sunny pop */
+.chat-msg.user .msg-body {
+  background-color: var(--boogie-cadmium) !important;
+  color: #0F1115 !important;
+  border: 3px solid #0F1115 !important;
+  box-shadow: 3px 3px 0 var(--mondrian-red), 6px 6px 0 #0F1115 !important;
+}
+
+/* Chat bin background and header */
+.history-sidebar {
+  background-color: var(--bg-subtle) !important;
+}
+
+#session-count-badge {
+  background: var(--mondrian-red) !important;
+  color: white !important;
+  box-shadow: 1px 1px 0 var(--boogie-yellow) !important;
 }

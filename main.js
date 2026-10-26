@@ -24,7 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.setAttribute('data-theme', theme);
     if (window.Storage) window.Storage.setTheme(theme);
     btnThemeToggle.forEach(btn => {
-      btn.innerHTML = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+      btn.innerHTML = theme === 'dark' 
+        ? '<span class="theme-pill-track"><span class="theme-cube sun">☀️</span></span><span class="theme-pill-text">Broadway Day</span>'
+        : '<span class="theme-pill-track"><span class="theme-cube moon">🌙</span></span><span class="theme-pill-text">Broadway Night</span>';
     });
   }
 
