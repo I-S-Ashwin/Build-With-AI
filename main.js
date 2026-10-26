@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.GeminiService.setApiKey(val);
       }
       modalApiKey.classList.remove('active');
-      alert(val ? 'Gemini API key saved locally!' : 'API key cleared. MediSense will use local triage heuristics.');
+      if (window.showMediSenseToast) window.showMediSenseToast(val ? 'Gemini API key saved locally!' : 'API key cleared. Using offline triage.');
     });
   }
 
@@ -334,6 +334,34 @@ document.addEventListener('DOMContentLoaded', () => {
       contentDiv.className = 'msg-formatted-content';
       contentDiv.innerHTML = renderFormattedMarkdown(text);
       bodyDiv.appendChild(contentDiv);
+
+      if (outcome) {
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'triage-chat-actions';
+        actionsDiv.innerHTML = `
+          <button type="button" class="btn btn-primary btn-save-bubble">💾 Save Consultation</button>
+          <button type="button" class="btn btn-secondary btn-expand-bubble">🔍 Fullscreen View</button>
+        `;
+        const btnSave = actionsDiv.querySelector('.btn-save-bubble');
+        const btnExpand = actionsDiv.querySelector('.btn-expand-bubble');
+
+        btnSave.onclick = () => {
+          if (window.onTriageSessionClosed && window.currentTriageOutcome) {
+            window.onTriageSessionClosed(window.currentTriageOutcome);
+            window.isCurrentSessionSaved = true;
+            btnSave.disabled = true;
+            btnSave.innerHTML = '✓ Saved to Bin';
+          }
+        };
+
+        btnExpand.onclick = () => {
+          if (window.currentTriageOutcome) {
+            openFullscreenResponse(window.currentTriageOutcome);
+          }
+        };
+
+        bodyDiv.appendChild(actionsDiv);
+      }
     }
 
     msgDiv.appendChild(authorDiv);
@@ -364,10 +392,43 @@ document.addEventListener('DOMContentLoaded', () => {
     if (indicator) indicator.remove();
   }
 
-  async function handleUserTriageSubmission(userText) {
-    const text = userText.trim();
-    if (!text) return;
+  function askSaveBeforeProceeding(text, onProceed) {
+    const banner = document.createElement('div');
+    banner.className = 'reask-save-banner';
+    banner.id = 'reask-save-prompt';
+    banner.innerHTML = `
+      <div>
+        <strong style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.04em;">📋 Active Assessment Unsaved:</strong>
+        <p style="margin: 0.2rem 0 0; font-size: 0.88rem;">Would you like to save your previous consultation before analyzing new symptoms?</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-primary" id="btn-reask-save" style="padding: 0.35rem 0.75rem; font-size: 0.82rem;">💾 Save & Continue</button>
+        <button type="button" class="btn btn-secondary" id="btn-reask-skip" style="padding: 0.35rem 0.75rem; font-size: 0.82rem;">Continue without Saving</button>
+      </div>
+    `;
+    messagesContainer.appendChild(banner);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
+    const btnSave = banner.querySelector('#btn-reask-save');
+    const btnSkip = banner.querySelector('#btn-reask-skip');
+
+    btnSave.onclick = () => {
+      banner.remove();
+      if (window.onTriageSessionClosed && window.currentTriageOutcome) {
+        window.onTriageSessionClosed(window.currentTriageOutcome);
+      }
+      window.isCurrentSessionSaved = true;
+      onProceed();
+    };
+
+    btnSkip.onclick = () => {
+      banner.remove();
+      window.isCurrentSessionSaved = true;
+      onProceed();
+    };
+  }
+
+  async function executeTriageSubmission(text) {
     appendMessageBubble('user', text);
     showTypingIndicator();
 
@@ -376,8 +437,9 @@ document.addEventListener('DOMContentLoaded', () => {
       removeTypingIndicator();
       appendMessageBubble('assistant', result.text, result.outcome);
 
-      // Store in active session context for full screen & save in Slices 3 & 4
+      // Store in active session context
       window.currentTriageOutcome = result;
+      window.isCurrentSessionSaved = false;
       if (window.onTriageResultReady) {
         window.onTriageResultReady(result);
       }
@@ -386,6 +448,19 @@ document.addEventListener('DOMContentLoaded', () => {
       appendMessageBubble('assistant', 'I encountered an error analyzing those symptoms. Please try typing them again.');
       console.error('Triage submission error:', err);
     }
+  }
+
+  async function handleUserTriageSubmission(userText) {
+    const text = userText.trim();
+    if (!text) return;
+
+    if (window.currentTriageOutcome && !window.isCurrentSessionSaved) {
+      document.getElementById('reask-save-prompt')?.remove();
+      askSaveBeforeProceeding(text, () => executeTriageSubmission(text));
+      return;
+    }
+
+    executeTriageSubmission(text);
   }
 
   // Handle direct microphone audio stream submissions
@@ -559,28 +634,161 @@ document.addEventListener('DOMContentLoaded', () => {
     screenFullscreen.style.display = 'flex';
   }
 
-  function closeFullscreenResponse() {
+  function closeFullscreenResponse(saveSession = false) {
     if (screenFullscreen) {
       screenFullscreen.style.display = 'none';
     }
-    // Triggers paper-throw save in Slice 4
-    if (window.onTriageSessionClosed && window.currentTriageOutcome) {
+    // Only trigger the paper-throw save if explicitly saving
+    if (saveSession && window.onTriageSessionClosed && window.currentTriageOutcome) {
       window.onTriageSessionClosed(window.currentTriageOutcome);
     }
   }
 
   if (btnFullscreenDismiss) {
-    btnFullscreenDismiss.addEventListener('click', closeFullscreenResponse);
+    // "Save Consultation" button
+    btnFullscreenDismiss.addEventListener('click', () => closeFullscreenResponse(true));
   }
 
-  // Hook triage completion to trigger full-screen presentation
+  // "✕ Close" button — closes fullscreen without auto-saving
+  const btnFullscreenCloseNoSave = document.getElementById('btn-fullscreen-close-nosave');
+  if (btnFullscreenCloseNoSave) {
+    btnFullscreenCloseNoSave.addEventListener('click', () => closeFullscreenResponse(false));
+  }
+
+  // ── Close Consultation button in chat bar ──────────────────────────
+  function clearChatMessages() {
+    const container = document.getElementById('chat-messages-container');
+    if (container) {
+      const children = Array.from(container.children);
+      children.forEach((c, i) => { if (i > 0) c.remove(); });
+    }
+    window.currentTriageOutcome = null;
+    window.isCurrentSessionSaved = false;
+    window.activeConversationHistory = [];
+    const badge = document.getElementById('session-status-badge');
+    if (badge) {
+      badge.textContent = 'In Progress';
+      badge.style.background = 'var(--mondrian-accent-yellow)';
+      badge.style.color = 'var(--mondrian-black)';
+    }
+    if (window.showMediSenseToast) window.showMediSenseToast('Consultation reset. Ready for new symptoms.');
+  }
+
+  const modalCloseConsult = document.getElementById('modal-close-consultation');
+  const btnCloseConsultCancel = document.getElementById('modal-close-consult-cancel');
+  const btnCloseConsultNoSave = document.getElementById('modal-close-consult-nosave');
+  const btnCloseConsultSave = document.getElementById('modal-close-consult-save');
+
+  function openCloseConsultModal() {
+    if (modalCloseConsult) modalCloseConsult.style.display = 'flex';
+  }
+  function closeCloseConsultModal() {
+    if (modalCloseConsult) modalCloseConsult.style.display = 'none';
+  }
+
+  const btnCloseConsultation = document.getElementById('btn-close-consultation');
+  if (btnCloseConsultation) {
+    btnCloseConsultation.addEventListener('click', () => {
+      // Check if there are any messages to save
+      const msgs = document.querySelectorAll('#chat-messages-container .chat-msg');
+      if (msgs.length > 1) {
+        openCloseConsultModal();
+      } else {
+        clearChatMessages();
+      }
+    });
+  }
+
+  if (btnCloseConsultCancel) btnCloseConsultCancel.addEventListener('click', closeCloseConsultModal);
+
+  if (btnCloseConsultNoSave) {
+    btnCloseConsultNoSave.addEventListener('click', () => {
+      closeCloseConsultModal();
+      clearChatMessages();
+    });
+  }
+
+  if (btnCloseConsultSave) {
+    btnCloseConsultSave.addEventListener('click', () => {
+      closeCloseConsultModal();
+      // Save then clear
+      if (window.onTriageSessionClosed && window.currentTriageOutcome) {
+        window.onTriageSessionClosed(window.currentTriageOutcome);
+      } else if (window.HistoryService) {
+        // No fullscreen outcome yet — save raw chat
+        window.HistoryService.triggerPaperThrowAnimation({ outcome: 'home-remedy', text: 'Consultation closed and archived.' });
+      }
+      setTimeout(() => clearChatMessages(), 700);
+    });
+  }
+
+  // ── Global custom confirm dialog (replaces browser confirm()) ──────
+  window.showCustomConfirm = function(title, message, onConfirm) {
+    const modal = document.getElementById('modal-custom-confirm');
+    const titleEl = document.getElementById('modal-confirm-title');
+    const msgEl = document.getElementById('modal-confirm-message');
+    const btnOk = document.getElementById('modal-confirm-ok');
+    const btnCancel = document.getElementById('modal-confirm-cancel');
+    if (!modal) { if (confirm(message)) onConfirm(); return; }
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    modal.style.display = 'flex';
+
+    const cleanup = () => { modal.style.display = 'none'; btnOk.onclick = null; btnCancel.onclick = null; };
+    btnOk.onclick = () => { cleanup(); onConfirm(); };
+    btnCancel.onclick = () => cleanup();
+  };
+
+  // Triage completion updates session status without hijacking user screen
   window.onTriageResultReady = (result) => {
-    if (result && result.isFinal) {
-      setTimeout(() => {
-        openFullscreenResponse(result);
-      }, 700); // Short dramatic beat after message arrives
+    window.currentTriageOutcome = result;
+    window.isCurrentSessionSaved = false;
+    const badge = document.getElementById('session-status-badge');
+    if (badge) {
+      badge.textContent = result.outcome === 'see-doctor' ? 'Clinical Referral' : 'Home Care Ready';
+      badge.style.background = result.outcome === 'see-doctor' ? 'var(--mondrian-red)' : 'var(--mondrian-blue)';
+      badge.style.color = '#fff';
     }
   };
+
+  // Wire top consultation bar and sidebar buttons
+  const btnTopCloseConsult = document.getElementById('btn-top-close-consult');
+  if (btnTopCloseConsult) {
+    btnTopCloseConsult.addEventListener('click', () => {
+      const msgs = document.querySelectorAll('#chat-messages-container .chat-msg');
+      if (msgs.length > 0) {
+        openCloseConsultModal();
+      } else {
+        clearChatMessages();
+      }
+    });
+  }
+
+  const btnTopSaveConsult = document.getElementById('btn-top-save-consult');
+  if (btnTopSaveConsult) {
+    btnTopSaveConsult.addEventListener('click', () => {
+      if (window.onTriageSessionClosed && window.currentTriageOutcome) {
+        window.onTriageSessionClosed(window.currentTriageOutcome);
+        window.isCurrentSessionSaved = true;
+      } else if (window.HistoryService) {
+        window.HistoryService.triggerPaperThrowAnimation({ outcome: 'home-remedy', text: 'Consultation archived.' });
+        window.isCurrentSessionSaved = true;
+      }
+    });
+  }
+
+  const btnSidebarNewConsult = document.getElementById('btn-sidebar-new-consult');
+  if (btnSidebarNewConsult) {
+    btnSidebarNewConsult.addEventListener('click', () => {
+      const msgs = document.querySelectorAll('#chat-messages-container .chat-msg');
+      if (msgs.length > 0 && !window.isCurrentSessionSaved) {
+        openCloseConsultModal();
+      } else {
+        clearChatMessages();
+      }
+    });
+  }
 
   // 10. Weekly Heatmap & Energy Selector Engine
   const heatmapRow = document.getElementById('wellness-heatmap-row');

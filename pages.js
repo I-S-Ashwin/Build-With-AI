@@ -59,7 +59,15 @@ const PageRouter = {
 
     // Trigger page-specific view rendering
     if (pageId === 'page-profile') ProfilePage.render();
-    if (pageId === 'page-encyclopedia') EncyclopediaPage.render();
+    if (pageId === 'page-encyclopedia') {
+      const searchInput = document.getElementById('encyc-search-input');
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.defaultValue = '';
+        EncyclopediaPage.searchQuery = '';
+      }
+      EncyclopediaPage.render();
+    }
     if (pageId === 'page-analytics') AnalyticsPage.render();
     if (pageId === 'page-emergency') EmergencyPage.render();
     if (pageId === 'page-medication') MedicationPage.render();
@@ -108,10 +116,15 @@ const ProfilePage = {
     const btnClear = document.getElementById('btn-profile-clear');
     if (btnClear) {
       btnClear.addEventListener('click', () => {
-        if (confirm('Clear your saved medical profile?')) {
+        const doClear = () => {
           if (window.Storage) window.Storage.clearProfile();
           this.render();
           this.showToast('Profile cleared.');
+        };
+        if (window.showCustomConfirm) {
+          window.showCustomConfirm('Clear Profile', 'Clear your saved medical profile? This cannot be undone.', doClear);
+        } else {
+          if (confirm('Clear your saved medical profile?')) doClear();
         }
       });
     }
@@ -266,6 +279,9 @@ const EncyclopediaPage = {
   init() {
     const searchInput = document.getElementById('encyc-search-input');
     if (searchInput) {
+      // Explicitly clear on init so browser autofill doesn't pollute the field
+      searchInput.value = '';
+      this.searchQuery = '';
       searchInput.addEventListener('input', (e) => {
         this.searchQuery = e.target.value.trim().toLowerCase();
         this.renderCards();
@@ -292,6 +308,11 @@ const EncyclopediaPage = {
   },
 
   render() {
+    const searchInput = document.getElementById('encyc-search-input');
+    if (searchInput && !this.searchQuery) {
+      searchInput.value = '';
+      searchInput.defaultValue = '';
+    }
     this.renderCards();
   },
 
@@ -729,7 +750,7 @@ const MedicationPage = {
     const notes = document.getElementById('med-input-notes')?.value.trim() || '';
 
     if (!name) {
-      alert('Please enter a medication or supplement name.');
+      if (window.showMediSenseToast) window.showMediSenseToast('Please enter a medication name.'); else alert('Please enter a medication name.');
       return;
     }
 
@@ -751,11 +772,14 @@ const MedicationPage = {
   },
 
   deleteMedication(medId) {
-    if (confirm('Delete this medication from your tracking list?')) {
-      if (window.Storage) {
-        window.Storage.deleteMedication(medId);
-      }
+    const doDelete = () => {
+      if (window.Storage) window.Storage.deleteMedication(medId);
       this.render();
+    };
+    if (window.showCustomConfirm) {
+      window.showCustomConfirm('Remove Medication', 'Remove this medication from your tracking list?', doDelete);
+    } else {
+      if (confirm('Delete this medication from your tracking list?')) doDelete();
     }
   },
 
@@ -796,18 +820,23 @@ const SettingsPage = {
           window.GeminiService.setApiKey(key || '');
         }
         this.render();
-        alert('Gemini API Key configuration saved.');
+        if (window.showMediSenseToast) window.showMediSenseToast('Gemini API Key saved.');
       });
     }
 
     const btnClearHistory = document.getElementById('settings-btn-clear-history');
     if (btnClearHistory) {
       btnClearHistory.addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete all saved consultation records? This cannot be undone.')) {
+        const doClear = () => {
           localStorage.removeItem('medisense_sessions');
-          alert('Consultation history cleared.');
+          if (window.showMediSenseToast) window.showMediSenseToast('Consultation history cleared.');
           this.render();
-          if (window.HistoryService) window.HistoryService.renderBin();
+          if (window.HistoryService) window.HistoryService.renderHistory();
+        };
+        if (window.showCustomConfirm) {
+          window.showCustomConfirm('Clear All Consultations', 'Are you sure you want to delete all saved consultation records from your chat bin? This cannot be undone.', doClear);
+        } else {
+          if (confirm('Are you sure you want to delete all saved consultation records?')) doClear();
         }
       });
     }
@@ -822,10 +851,15 @@ const SettingsPage = {
     const btnFactoryReset = document.getElementById('settings-btn-factory-reset');
     if (btnFactoryReset) {
       btnFactoryReset.addEventListener('click', () => {
-        if (confirm('⚠️ WARNING: This will completely reset all your local MediSense data, including profile, sessions, and medications. Proceed?')) {
+        const doReset = () => {
           localStorage.clear();
-          alert('MediSense reset complete. Reloading...');
-          location.reload();
+          if (window.showMediSenseToast) window.showMediSenseToast('MediSense reset complete. Reloading...');
+          setTimeout(() => location.reload(), 600);
+        };
+        if (window.showCustomConfirm) {
+          window.showCustomConfirm('Factory Reset MediSense', '⚠️ WARNING: This will completely reset all your local MediSense data, including profile, sessions, and medications. Proceed?', doReset);
+        } else {
+          if (confirm('This will reset all your local MediSense data. Proceed?')) doReset();
         }
       });
     }

@@ -2269,3 +2269,57 @@ body {
   font-weight: 850;
   margin: 0.75rem 0 0.3rem;
 }
+
+
+/* Custom Confirm / Close Consultation Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 10, 10, 0.72);
+  backdrop-filter: blur(4px);
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: cinematicFadeIn 0.18s ease forwards;
+}
+
+.modal-card {
+  background-color: var(--bg-surface);
+  border: 3px solid var(--mondrian-black, #0A0A0A);
+  box-shadow: 6px 6px 0 var(--mondrian-black, #0A0A0A);
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Chat inline consultation actions */
+.triage-chat-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 2px dashed rgba(0, 0, 0, 0.2);
+  flex-wrap: wrap;
+}
+
+.triage-chat-actions button {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  border: 2px solid var(--mondrian-black);
+}
+
+.reask-save-banner {
+  margin: 0.75rem 0;
+  padding: 0.85rem 1.1rem;
+  background: var(--mondrian-accent-yellow);
+  border: 2px solid var(--mondrian-black);
+  box-shadow: 3px 3px 0 var(--mondrian-black);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}

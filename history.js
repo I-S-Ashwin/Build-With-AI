@@ -210,17 +210,26 @@ const HistoryService = {
   },
 
   deleteSession(sessionId) {
-    if (!confirm('Are you sure you want to delete this consultation from your chat bin?')) {
-      return;
+    const doDelete = () => {
+      if (window.Storage) {
+        window.Storage.deleteSession(sessionId);
+      }
+      this.renderHistory();
+      if (window.renderWeeklyHeatmap) {
+        window.renderWeeklyHeatmap();
+      }
+      this.showToast('Consultation removed from Chat Bin.');
+    };
+
+    if (window.showCustomConfirm) {
+      window.showCustomConfirm(
+        'Delete Consultation',
+        'Remove this consultation from your Chat Bin? This cannot be undone.',
+        doDelete
+      );
+    } else {
+      if (confirm('Are you sure you want to delete this consultation from your chat bin?')) doDelete();
     }
-    if (window.Storage) {
-      window.Storage.deleteSession(sessionId);
-    }
-    this.renderHistory();
-    if (window.renderWeeklyHeatmap) {
-      window.renderWeeklyHeatmap();
-    }
-    this.showToast('Consultation removed from Chat Bin.');
   },
 
   // Export Session to Formatted Printable PDF
@@ -230,7 +239,7 @@ const HistoryService = {
     if (!session) return;
 
     if (typeof html2pdf === 'undefined') {
-      alert('PDF generation library is loading. Please check your internet connection.');
+      this.showToast('PDF generator loading. Please check your connection.');
       return;
     }
 
@@ -332,6 +341,7 @@ const HistoryService = {
 };
 
 window.HistoryService = HistoryService;
+window.showMediSenseToast = (text) => HistoryService.showToast(text);
 
 document.addEventListener('DOMContentLoaded', () => {
   HistoryService.init();
