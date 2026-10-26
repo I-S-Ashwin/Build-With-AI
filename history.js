@@ -6,6 +6,19 @@ const HistoryService = {
   init() {
     this.renderHistory();
     this.setupPaperThrowListener();
+    this.setupModalBackdropClose();
+  },
+
+  setupModalBackdropClose() {
+    const modal = document.getElementById('modal-session-details');
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+        }
+      });
+    }
   },
 
   setupPaperThrowListener() {
@@ -184,7 +197,7 @@ const HistoryService = {
         <p style="font-size: 0.8rem; color: var(--text-muted);">${dateFormatted}</p>
       </div>
 
-      <div style="max-height: 280px; overflow-y: auto; margin-bottom: 1.25rem; padding-right: 0.5rem;">
+      <div style="margin-bottom: 1.25rem; padding-right: 0.25rem;">
         ${msgsHtml}
       </div>
 
@@ -202,11 +215,13 @@ const HistoryService = {
     if (btnDetailsDelete) {
       btnDetailsDelete.onclick = () => {
         modal.classList.remove('active');
+        modal.style.display = 'none';
         this.deleteSession(sessionId);
       };
     }
 
     modal.classList.add('active');
+    modal.style.display = 'flex';
   },
 
   deleteSession(sessionId) {

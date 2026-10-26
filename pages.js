@@ -1806,6 +1806,12 @@ function initKeyboardShortcuts() {
     const isInput = activeTag === 'input' || activeTag === 'textarea' || document.activeElement?.isContentEditable;
 
     if (e.key === 'Escape') {
+      const sessionModal = document.getElementById('modal-session-details');
+      if (sessionModal && (sessionModal.classList.contains('active') || sessionModal.style.display === 'flex' || sessionModal.style.display === 'block')) {
+        sessionModal.classList.remove('active');
+        sessionModal.style.display = 'none';
+        return;
+      }
       const closeConsult = document.getElementById('modal-close-consultation');
       if (closeConsult && closeConsult.style.display !== 'none') {
         closeConsult.style.display = 'none';
