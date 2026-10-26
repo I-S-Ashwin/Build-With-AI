@@ -3,6 +3,44 @@
 :root {
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   
+  /* Piet Mondrian & Broadway Boogie-Woogie (1942-1943) Palette */
+  --boogie-yellow: #FFD200;
+  --boogie-cadmium: #FFE259;
+  --boogie-red: #D9232A;
+  --boogie-blue: #1554A8;
+  --boogie-white: #FFFFFF;
+  --boogie-gray: #D8DCE0;
+  --boogie-black: #111111;
+  
+  /* Broadway Boogie-Woogie Syncopated Track Patterns */
+  --boogie-track-h: repeating-linear-gradient(
+    90deg,
+    var(--boogie-yellow) 0px,
+    var(--boogie-yellow) 18px,
+    var(--boogie-red) 18px,
+    var(--boogie-red) 30px,
+    var(--boogie-yellow) 30px,
+    var(--boogie-yellow) 48px,
+    var(--boogie-blue) 48px,
+    var(--boogie-blue) 60px,
+    var(--boogie-yellow) 60px,
+    var(--boogie-yellow) 78px,
+    var(--boogie-white) 78px,
+    var(--boogie-white) 90px,
+    var(--boogie-yellow) 90px,
+    var(--boogie-yellow) 106px,
+    var(--boogie-gray) 106px,
+    var(--boogie-gray) 118px,
+    var(--boogie-yellow) 118px,
+    var(--boogie-yellow) 136px,
+    var(--boogie-red) 136px,
+    var(--boogie-red) 144px,
+    var(--boogie-blue) 144px,
+    var(--boogie-blue) 152px,
+    var(--boogie-yellow) 152px,
+    var(--boogie-yellow) 168px
+  );
+
   /* Piet Mondrian Palette */
   --mondrian-red: #D62828;
   --mondrian-blue: #003049;
@@ -30,6 +68,12 @@
 
 [data-theme="dark"] {
   --bg-app: #121212;
+  --boogie-yellow: #FFDC33;
+  --boogie-cadmium: #FFE866;
+  --boogie-red: #FF3B3F;
+  --boogie-blue: #2A75D3;
+  --boogie-white: #E6EDF2;
+  --boogie-gray: #3A444E;
   --bg-surface: #1E1E1E;
   --bg-subtle: #282828;
   --text-main: #F8F9FA;
@@ -52,6 +96,11 @@
 body {
   font-family: var(--font-family);
   background-color: var(--bg-app);
+  /* Broadway Boogie-Woogie Ambient Avenue Grid */
+  background-image: 
+    linear-gradient(to right, rgba(255, 210, 0, 0.09) 2px, transparent 2px),
+    linear-gradient(to bottom, rgba(255, 210, 0, 0.09) 2px, transparent 2px);
+  background-size: 80px 80px;
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -304,27 +353,30 @@ body {
   font-weight: 800;
   font-size: 1rem;
   padding: 0.85rem 1.75rem;
-  border: var(--border-thick);
+  border: 3px solid var(--mondrian-black);
   background-color: var(--mondrian-yellow);
   color: var(--mondrian-black);
   cursor: pointer;
-  box-shadow: var(--shadow-block);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 3px 3px 0 var(--boogie-yellow), 6px 6px 0 var(--mondrian-black);
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.4, 1.2), box-shadow 0.12s cubic-bezier(0.2, 0.8, 0.4, 1.2);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
+  position: relative;
 }
 
 .btn:hover {
   transform: translate(2px, 2px);
-  box-shadow: var(--shadow-block-hover);
+  box-shadow: 1px 1px 0 var(--boogie-yellow), 3px 3px 0 var(--mondrian-black);
 }
 
 .btn:active {
   transform: translate(4px, 4px);
   box-shadow: none;
 }
+
+
 
 .btn-primary {
   background-color: var(--mondrian-red);
@@ -551,19 +603,51 @@ body {
 }
 
 .btn-mic {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  border: var(--border-thick);
-  background-color: var(--mondrian-red);
+  border: 4px solid var(--mondrian-black);
+  background-color: var(--boogie-red);
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  box-shadow: var(--shadow-block);
+  box-shadow: 3px 3px 0 var(--boogie-yellow), 6px 6px 0 var(--mondrian-black);
   transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.15s ease;
   position: relative;
+}
+
+.btn-mic::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--boogie-yellow) 0deg 45deg,
+    var(--boogie-red) 45deg 90deg,
+    var(--boogie-yellow) 90deg 135deg,
+    var(--boogie-blue) 135deg 180deg,
+    var(--boogie-white) 180deg 225deg,
+    var(--boogie-yellow) 225deg 270deg,
+    var(--boogie-red) 270deg 315deg,
+    var(--boogie-blue) 315deg 360deg
+  );
+  padding: 5px;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #fff calc(100% - 5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #fff calc(100% - 5px));
+  animation: boogieRotate 12s linear infinite;
+  pointer-events: none;
+}
+
+.btn-mic:hover::before {
+  animation: boogieRotate 5s linear infinite;
+}
+
+.btn-mic.recording::before {
+  animation: boogieRotate 1.8s linear infinite;
+  filter: drop-shadow(0 0 6px var(--boogie-red));
 }
 
 .btn-mic:hover {
@@ -1280,15 +1364,55 @@ body {
   color: var(--mondrian-black);
 }
 
+.nav-tab-btn {
+  flex: 1;
+  min-width: 135px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: none;
+  border-right: 2px solid var(--mondrian-black);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-main);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-tab-btn:hover {
+  background-color: var(--boogie-cadmium);
+  color: var(--mondrian-black);
+  transform: translateY(-1px);
+}
+
 .nav-tab-btn.active {
   background-color: var(--bg-app);
   color: var(--mondrian-black);
-  border-bottom: 4px solid var(--mondrian-red);
+  box-shadow: inset 0 3px 0 var(--boogie-red);
+}
+
+.nav-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--boogie-track-h);
+  background-size: 168px 100%;
+  animation: boogieShiftFast 2.8s linear infinite;
+  border-top: 1px solid var(--mondrian-black);
 }
 
 [data-theme="dark"] .nav-tab-btn.active {
   color: var(--mondrian-white);
-  border-bottom: 4px solid var(--mondrian-red);
 }
 
 .nav-tab-icon {
@@ -2322,4 +2446,85 @@ body {
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BROADWAY BOOGIE-WOOGIE AUTHENTIC JAZZ DETAILS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Custom Boogie-Woogie Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--boogie-yellow);
+  border-left: 2px solid var(--mondrian-black);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--boogie-red);
+  border: 2px solid var(--mondrian-black);
+  box-shadow: inset 2px 2px 0 var(--boogie-cadmium);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--boogie-blue);
+}
+
+/* Boogie-Woogie Track Accent Bar Utility */
+.boogie-avenue-strip {
+  height: 10px;
+  width: 100%;
+  background: var(--boogie-track-h);
+  background-size: 168px 100%;
+  border-top: 2px solid var(--mondrian-black);
+  border-bottom: 2px solid var(--mondrian-black);
+  animation: boogieShift 8s linear infinite;
+}
+
+/* Staccato Jazz Corners on Preview Grid Cards */
+.grid-cell {
+  position: relative;
+}
+.grid-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  background: var(--boogie-yellow);
+  border-left: 2px solid var(--mondrian-black);
+  border-bottom: 2px solid var(--mondrian-black);
+}
+.grid-cell:nth-child(1)::before { background: var(--boogie-red); }
+.grid-cell:nth-child(2)::before { background: var(--boogie-blue); }
+.grid-cell:nth-child(3)::before { background: var(--boogie-yellow); }
+.grid-cell:nth-child(4)::before { background: var(--boogie-white); }
+
+/* Symptom chips Boogie-Woogie dual shadow */
+.symptom-chip {
+  box-shadow: 2px 2px 0 var(--boogie-yellow), 4px 4px 0 var(--mondrian-black) !important;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.15s ease !important;
+}
+.symptom-chip:hover {
+  background-color: var(--boogie-cadmium) !important;
+  color: var(--mondrian-black) !important;
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0 var(--boogie-yellow), 2px 2px 0 var(--mondrian-black) !important;
+}
+
+/* Active triage session bar boogie underline */
+.consultation-top-bar {
+  border-bottom: 3px solid var(--boogie-yellow) !important;
+  background: var(--bg-surface) !important;
+  box-shadow: 0 3px 0 var(--mondrian-black);
+}
+
+/* Heatmap tiles boogie pop */
+.heatmap-tile {
+  box-shadow: 1px 1px 0 var(--boogie-yellow), 2px 2px 0 var(--mondrian-black);
+}
+.heatmap-tile:hover {
+  box-shadow: 2px 2px 0 var(--boogie-yellow), 4px 4px 0 var(--mondrian-black);
 }
