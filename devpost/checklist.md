@@ -69,6 +69,8 @@ Build mode: learn
 - [x] Add Broadway Boogie-Woogie living grid animations & neo-brutalist visual depth
 - [x] Add Weekly Wellness Heatmap & Energy Level selector to chat workspace
 - [x] Add tactile Web Audio sound effects for UI clicks and paper-throw save
+- [x] Add 116-disease clinical knowledge base from Kaggle dataset for 100% offline triage
+- [x] Add 6 integrated pages (Profile, Encyclopedia, Analytics, Emergency Guide, Medication Log, Settings) & Mondrian navigation
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
