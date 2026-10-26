@@ -1806,6 +1806,11 @@ function initKeyboardShortcuts() {
     const isInput = activeTag === 'input' || activeTag === 'textarea' || document.activeElement?.isContentEditable;
 
     if (e.key === 'Escape') {
+      const closeConsult = document.getElementById('modal-close-consultation');
+      if (closeConsult && closeConsult.style.display !== 'none') {
+        closeConsult.style.display = 'none';
+        return;
+      }
       const shortcutsModal = document.getElementById('keyboard-shortcuts-modal');
       if (shortcutsModal && shortcutsModal.style.display !== 'none') {
         shortcutsModal.style.display = 'none';
@@ -1826,10 +1831,36 @@ function initKeyboardShortcuts() {
         fsOverlay.style.display = 'none';
         return;
       }
+      const detailModal = document.getElementById('modal-disease-detail');
+      if (detailModal && (detailModal.classList.contains('active') || detailModal.style.display !== 'none')) {
+        detailModal.classList.remove('active');
+        detailModal.style.display = 'none';
+        return;
+      }
+      const apiKeyModal = document.getElementById('modal-api-key');
+      if (apiKeyModal && (apiKeyModal.classList.contains('active') || apiKeyModal.style.display !== 'none')) {
+        apiKeyModal.classList.remove('active');
+        apiKeyModal.style.display = 'none';
+        return;
+      }
+      if (window.TutorialService && window.TutorialService.isPlaying) {
+        window.TutorialService.finish();
+        return;
+      }
       if (isInput) {
         document.activeElement.blur();
       }
       return;
+    }
+
+    // Handle Enter inside modal-close-consultation to confirm
+    if (e.key === 'Enter') {
+      const closeConsult = document.getElementById('modal-close-consultation');
+      if (closeConsult && closeConsult.style.display === 'flex') {
+        e.preventDefault();
+        document.getElementById('modal-close-consult-save')?.click();
+        return;
+      }
     }
 
     if (isInput) return;
@@ -1874,7 +1905,7 @@ function initKeyboardShortcuts() {
       e.preventDefault();
       window.PageRouter?.navigateTo('page-triage');
       setTimeout(() => {
-        document.getElementById('input-symptoms')?.focus();
+        document.getElementById('input-symptoms-text')?.focus();
       }, 100);
     }
   });

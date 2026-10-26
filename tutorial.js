@@ -31,6 +31,21 @@ const TutorialService = {
       });
     }
 
+    // Dismiss tutorial if overlay backdrop is clicked
+    const overlay = document.getElementById('tutorial-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) this.finish();
+      });
+    }
+
+    // Dismiss tutorial on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.isPlaying) {
+        this.finish();
+      }
+    });
+
     // Auto-check on login if tutorial hasn't been seen
     const seen = window.Storage && window.Storage.isTutorialSeen();
     if (!seen) {

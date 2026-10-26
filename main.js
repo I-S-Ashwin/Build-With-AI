@@ -177,11 +177,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Demo mode: bypass login entirely — enters as "Demo Patient"
+  // Demo mode: bypass login entirely — enters as "Demo Patient" with rich clinical test data
   function enterDemoMode() {
     const user = window.Storage ? window.Storage.setUser('Demo Patient') : { username: 'Demo Patient' };
-    if (userDisplayBadge) userDisplayBadge.textContent = user.username;
+    if (userDisplayBadge) userDisplayBadge.textContent = 'Demo Patient';
+
+    if (window.Storage) {
+      window.Storage.setTutorialSeen();
+
+      // Ensure demo profile is populated with realistic clinical context
+      const existingProfile = window.Storage.getProfile();
+      if (!existingProfile || !existingProfile.name) {
+        window.Storage.saveProfile({
+          name: 'Sarah Connor',
+          age: 34,
+          gender: 'Female',
+          bloodType: 'O+',
+          conditions: ['Asthma', 'Hypertension'],
+          allergies: 'Penicillin, Peanuts',
+          medications: 'Albuterol Inhaler (PRN), Lisinopril 10mg',
+          emergencyContactName: 'John Connor (Son)',
+          emergencyContactPhone: '+1 (555) 019-2831'
+        });
+      }
+
+      // Ensure demo medications are populated
+      const existingMeds = window.Storage.getMedications();
+      if (!existingMeds || existingMeds.length === 0) {
+        const todayKey = new Date().toISOString().split('T')[0];
+        window.Storage.saveMedications([
+          { id: 'med_demo_1', name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', timeOfDay: 'Morning', notes: 'Take with full glass of water', takenDates: [todayKey] },
+          { id: 'med_demo_2', name: 'Albuterol Inhaler', dosage: '2 puffs', frequency: 'As needed', timeOfDay: 'Flexible', notes: 'Prior to intense activity', takenDates: [] },
+          { id: 'med_demo_3', name: 'Vitamin D3', dosage: '2000 IU', frequency: 'Once daily', timeOfDay: 'Morning', notes: 'With breakfast', takenDates: [todayKey] }
+        ]);
+      }
+    }
+
+    if (window.TutorialService) window.TutorialService.finish();
+
+    // Dismiss any active modals or lingering banners
+    closeCloseConsultModal();
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    document.querySelectorAll('.fullscreen-response-overlay').forEach(m => m.style.display = 'none');
+    document.getElementById('reask-save-prompt')?.remove();
+
     showScreen(screenApp);
+    window.PageRouter?.navigateTo('page-triage');
+
+    // Trigger re-render of sub-pages
+    window.ProfilePage?.render();
+    window.MedicationPage?.render();
+    window.AnalyticsPage?.render();
+
+    setTimeout(() => {
+      const input = document.getElementById('input-symptoms-text');
+      if (input) {
+        input.focus();
+      }
+    }, 150);
   }
 
   const btnDemoLogin = document.getElementById('btn-demo-login');
@@ -534,12 +587,8 @@ function checkSymptomRecurrence(userText) {
     const text = userText.trim();
     if (!text) return;
 
-    if (window.currentTriageOutcome && !window.isCurrentSessionSaved) {
-      document.getElementById('reask-save-prompt')?.remove();
-      askSaveBeforeProceeding(text, () => executeTriageSubmission(text));
-      return;
-    }
-
+    // Remove any lingering banner prompt and execute directly
+    document.getElementById('reask-save-prompt')?.remove();
     executeTriageSubmission(text);
   }
 
@@ -798,6 +847,11 @@ function checkSymptomRecurrence(userText) {
   }
   function closeCloseConsultModal() {
     if (modalCloseConsult) modalCloseConsult.style.display = 'none';
+  }
+  if (modalCloseConsult) {
+    modalCloseConsult.onclick = (e) => {
+      if (e.target === modalCloseConsult) closeCloseConsultModal();
+    };
   }
 
   const btnCloseConsultation = document.getElementById('btn-close-consultation');
