@@ -403,6 +403,55 @@
             </div>
           </form>
         </div>
+
+        <!-- BMI & Vitals Strip Widget -->
+        <div class="bmi-widget-strip" id="profile-bmi-strip">
+          <div class="bmi-cell bmi-cell-1">
+            <div class="bmi-cell-label">BMI Index</div>
+            <div class="bmi-cell-value" id="bmi-value-display">—</div>
+            <div class="bmi-cell-sub" id="bmi-category-display">Enter height &amp; weight</div>
+          </div>
+          <div class="bmi-cell bmi-cell-2">
+            <div class="bmi-cell-label">Ideal Range</div>
+            <div class="bmi-cell-value">18.5–24.9</div>
+            <div class="bmi-cell-sub">WHO Healthy Adult</div>
+          </div>
+          <div class="bmi-cell bmi-cell-3">
+            <div class="bmi-cell-label">Heart Risk</div>
+            <div class="bmi-cell-value" id="bmi-risk-display">—</div>
+            <div class="bmi-cell-sub">Based on profile</div>
+          </div>
+          <div class="bmi-cell bmi-cell-4">
+            <div class="bmi-cell-label">Profile Score</div>
+            <div class="bmi-cell-value" id="profile-completeness">0%</div>
+            <div class="bmi-cell-sub">Completeness</div>
+          </div>
+        </div>
+
+        <!-- Height/Weight for BMI quick calc -->
+        <div class="profile-form-card" style="margin-top:0; padding: 1rem 1.5rem; border-top: none;">
+          <div class="form-row-2col" style="margin: 0;">
+            <div class="form-group">
+              <label for="profile-height">Height (cm)</label>
+              <input type="number" id="profile-height" class="input-text" placeholder="e.g. 170" min="50" max="250" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="profile-weight">Weight (kg)</label>
+              <input type="number" id="profile-weight" class="input-text" placeholder="e.g. 68" min="20" max="300" autocomplete="off">
+            </div>
+          </div>
+        </div>
+
+        <!-- ICE Medical Wallet Card -->
+        <div class="ice-wallet-card" id="ice-wallet-card">
+          <div class="ice-wallet-icon">🆘</div>
+          <div>
+            <div class="ice-wallet-title">🏥 In Case of Emergency (ICE) — Medical Wallet Card</div>
+            <div class="ice-wallet-content" id="ice-card-content">Save your profile to populate your emergency medical card with blood type, allergies, conditions, and contact.</div>
+          </div>
+          <button type="button" class="btn btn-print-ice" onclick="window.print()" title="Print Wallet Card">🖨️ Print Card</button>
+        </div>
+
       </div>
     </div>
 
@@ -416,6 +465,40 @@
         <div class="encyc-search-bar">
           <input type="search" id="encyc-search-input" class="input-text" placeholder="🔍 Search conditions, symptoms, keywords (e.g. asthma, chest, rash)..." autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="medisense_kb_search_noautofill" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly');" value="">
           <span id="encyc-result-count" class="encyc-count-pill">Showing 116 conditions</span>
+        </div>
+      </div>
+
+      <!-- Condition Spotlight Marquee -->
+      <div class="encyc-spotlight-bar">
+        <div class="encyc-spotlight-inner">
+          🔬 <strong>INFLUENZA</strong> — High fever, muscle aches, sudden onset<span class="encyc-spotlight-sep">◆</span>
+          🧠 <strong>MIGRAINE</strong> — Throbbing unilateral headache with photophobia<span class="encyc-spotlight-sep">◆</span>
+          💔 <strong>HYPERTENSION</strong> — Silent killer: often no symptoms until crisis<span class="encyc-spotlight-sep">◆</span>
+          🫁 <strong>PNEUMONIA</strong> — Productive cough, fever, pleuritic chest pain<span class="encyc-spotlight-sep">◆</span>
+          🩺 <strong>TYPE 2 DIABETES</strong> — Polydipsia, polyuria, fatigue, slow wound healing<span class="encyc-spotlight-sep">◆</span>
+          🫀 <strong>MYOCARDIAL INFARCTION</strong> — Crushing chest pain, diaphoresis, arm/jaw radiation<span class="encyc-spotlight-sep">◆</span>
+          🦠 <strong>COVID-19</strong> — Loss of smell/taste, cough, fever, fatigue<span class="encyc-spotlight-sep">◆</span>
+          🧬 <strong>ANEMIA</strong> — Pallor, fatigue, dyspnea on exertion, rapid heartbeat
+        </div>
+      </div>
+
+      <!-- Stats Quick Metrics -->
+      <div class="encyc-stats-strip">
+        <div class="encyc-stat-cell encyc-stat-c1">
+          <span class="encyc-stat-num">116</span>
+          <span class="encyc-stat-lbl">Total Conditions</span>
+        </div>
+        <div class="encyc-stat-cell encyc-stat-c2">
+          <span class="encyc-stat-num">14</span>
+          <span class="encyc-stat-lbl">Body Systems</span>
+        </div>
+        <div class="encyc-stat-cell encyc-stat-c3">
+          <span class="encyc-stat-num">100%</span>
+          <span class="encyc-stat-lbl">Offline Available</span>
+        </div>
+        <div class="encyc-stat-cell encyc-stat-c4">
+          <span class="encyc-stat-num">480+</span>
+          <span class="encyc-stat-lbl">Triage Symptom Links</span>
         </div>
       </div>
 
@@ -515,6 +598,37 @@
             </div>
           </div>
         </div>
+        <!-- Weekly Wellness Matrix -->
+        <div class="analytics-section-card" style="margin-top: 1.5rem;">
+          <h3 style="margin: 0 0 0.35rem; font-size: 1.15rem;">14-Day Wellness Heatmap</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 0.75rem;">Daily triage activity pattern — green: home care, yellow: watchful, red: doctor referred, blue: no activity.</p>
+          <div class="weekly-wellness-grid" id="analytics-wellness-grid">
+            <!-- Rendered by AnalyticsPage -->
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 0.75rem; flex-wrap: wrap;">
+            <span style="font-size:0.75rem; font-weight:800;"><span style="display:inline-block;width:12px;height:12px;background:#10B981;border:2px solid #000;vertical-align:middle;margin-right:4px;"></span>Home Care</span>
+            <span style="font-size:0.75rem; font-weight:800;"><span style="display:inline-block;width:12px;height:12px;background:#F59E0B;border:2px solid #000;vertical-align:middle;margin-right:4px;"></span>Watchful</span>
+            <span style="font-size:0.75rem; font-weight:800;"><span style="display:inline-block;width:12px;height:12px;background:#EF4444;border:2px solid #000;vertical-align:middle;margin-right:4px;"></span>Doctor Referred</span>
+            <span style="font-size:0.75rem; font-weight:800;"><span style="display:inline-block;width:12px;height:12px;background:var(--bg-card);border:2px solid #000;vertical-align:middle;margin-right:4px;"></span>No Activity</span>
+          </div>
+        </div>
+
+        <!-- Body System Clinical Breakdown -->
+        <div class="analytics-section-card" style="margin-top: 1.5rem;">
+          <h3 style="margin: 0 0 0.35rem; font-size: 1.15rem;">Body System Symptom Coverage</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 0.75rem;">Distribution of clinical conditions across physiological systems in MediSense's knowledge base.</p>
+          <div class="system-breakdown-list">
+            <div class="system-row"><span class="system-name">Respiratory</span><div class="system-bar-track"><div class="system-bar-fill" style="width:70%;background:#3B82F6;"></div></div><span class="system-count">18</span></div>
+            <div class="system-row"><span class="system-name">Cardiovascular</span><div class="system-bar-track"><div class="system-bar-fill" style="width:50%;background:#EF4444;"></div></div><span class="system-count">13</span></div>
+            <div class="system-row"><span class="system-name">Neurological</span><div class="system-bar-track"><div class="system-bar-fill" style="width:44%;background:#8B5CF6;"></div></div><span class="system-count">11</span></div>
+            <div class="system-row"><span class="system-name">Digestive</span><div class="system-bar-track"><div class="system-bar-fill" style="width:38%;background:#F59E0B;"></div></div><span class="system-count">10</span></div>
+            <div class="system-row"><span class="system-name">Infectious</span><div class="system-bar-track"><div class="system-bar-fill" style="width:34%;background:#10B981;"></div></div><span class="system-count">9</span></div>
+            <div class="system-row"><span class="system-name">Dermatological</span><div class="system-bar-track"><div class="system-bar-fill" style="width:30%;background:#EC4899;"></div></div><span class="system-count">8</span></div>
+            <div class="system-row"><span class="system-name">Musculoskeletal</span><div class="system-bar-track"><div class="system-bar-fill" style="width:26%;background:#14B8A6;"></div></div><span class="system-count">7</span></div>
+            <div class="system-row"><span class="system-name">Metabolic/Endo.</span><div class="system-bar-track"><div class="system-bar-fill" style="width:22%;background:#F97316;"></div></div><span class="system-count">6</span></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -549,6 +663,16 @@
         </div>
 
         <h3 style="margin: 2rem 0 1rem; font-size: 1.3rem; font-weight: 900;">Critical First Responder Action Protocols</h3>
+
+        <!-- CPR Jazz Metronome Widget -->
+        <div class="cpr-metronome-widget">
+          <div class="cpr-widget-title">🎵 CPR Rhythm Metronome — 100 BPM (Hands-Only)</div>
+          <p style="font-size:0.82rem; opacity:0.8; margin: 0.4rem 0 0.75rem;">Press the beat dot to start — compression rhythm synced to "Stayin' Alive" by Bee Gees</p>
+          <div id="cpr-pulse-dot" class="cpr-pulse-dot" onclick="window.TriageCPRMetronome && window.TriageCPRMetronome.toggle()" title="Click to start/stop">💓</div>
+          <div class="cpr-bpm-display">100 BPM</div>
+          <div class="cpr-tempo-label">Push HARD · Push FAST · 2 inches deep · Chest recoil</div>
+          <button type="button" class="btn cpr-btn-start" id="btn-cpr-start" onclick="window.TriageCPRMetronome && window.TriageCPRMetronome.toggle()">▶ Start Rhythm Guide</button>
+        </div>
 
         <!-- Emergency Protocols Grid -->
         <div class="emergency-protocols-grid">
@@ -664,6 +788,42 @@
           <div>
             <h2>Daily Medication Tracker &amp; To-Do Log</h2>
             <p>Track your daily prescriptions and supplements. Check off doses to build consecutive consistency streaks.</p>
+          </div>
+        </div>
+
+        <!-- Adherence Ring + Streak Banner -->
+        <div class="med-adherence-ring">
+          <div class="adherence-ring-svg">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle class="adherence-ring-track" cx="40" cy="40" r="35"/>
+              <circle class="adherence-ring-progress" id="med-ring-progress" cx="40" cy="40" r="35"/>
+            </svg>
+            <div class="adherence-ring-label" id="med-ring-pct-label">—</div>
+          </div>
+          <div class="adherence-info-block">
+            <div class="adherence-pct" id="med-adherence-pct">—</div>
+            <div style="font-size:0.82rem; font-weight:700; color:var(--text-muted);">Today's Adherence Rate</div>
+            <div class="adherence-streak" id="med-streak-text">🔥 Start checking off doses to build your streak!</div>
+          </div>
+          <div style="margin-left: auto; text-align: right;">
+            <div style="font-size: 2rem; font-weight: 900; color: #D97706;" id="med-streak-count">0</div>
+            <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">Day Streak</div>
+          </div>
+        </div>
+
+        <!-- Time-of-Day Medication Trays -->
+        <div class="med-time-trays" id="med-time-trays">
+          <div class="med-tray tray-morning">
+            <div class="med-tray-header">☀️ Morning</div>
+            <div id="med-tray-morning"><span class="med-tray-empty">No morning meds</span></div>
+          </div>
+          <div class="med-tray tray-afternoon">
+            <div class="med-tray-header">🌤️ Afternoon</div>
+            <div id="med-tray-afternoon"><span class="med-tray-empty">No afternoon meds</span></div>
+          </div>
+          <div class="med-tray tray-evening">
+            <div class="med-tray-header">🌙 Evening</div>
+            <div id="med-tray-evening"><span class="med-tray-empty">No evening meds</span></div>
           </div>
         </div>
 
@@ -830,6 +990,30 @@
               ⚠️ Reset All Data
             </button>
           </div>
+        </div>
+
+        <!-- Broadway Art Studio Manifesto -->
+        <div class="art-studio-manifesto" style="margin-top: 1.5rem;">
+          <div class="art-studio-manifesto-inner">
+            <div class="art-studio-title">🎨 Broadway Boogie-Woogie Design System</div>
+            <div class="art-studio-heading">Designed after Piet Mondrian's 1942–43 Masterwork</div>
+            <div class="art-studio-body">
+              MediSense's visual language mirrors the kinetic rhythm of Manhattan's grid — bold primary colors, thick black lines, syncopated patterns.
+              Just as Mondrian's painting encoded jazz rhythms into a city map, MediSense encodes clinical precision into interactive color blocks.
+              Every tab accent, every shadow offset, every animated ribbon is a visual note in the Broadway Boogie-Woogie score. 🟥🟨🟦
+            </div>
+          </div>
+        </div>
+
+        <!-- Local Knowledge Base Diagnostic Panel -->
+        <div class="kb-diagnostic-panel">
+          <div class="kb-diagnostic-title">⚙️ Clinical Engine Self-Test</div>
+          <p style="font-size:0.85rem; color: var(--text-muted); margin: 0 0 0.75rem;">Run an automated diagnostic on the local 116-condition knowledge base. Tests NLP pattern matching, symptom resolution, and triage output.</p>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-run-kb-test" id="btn-run-kb-test">🔬 Run Engine Test</button>
+            <span id="kb-test-status" style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted);">Not yet tested</span>
+          </div>
+          <div class="kb-test-output" id="kb-test-output" style="display:none;"></div>
         </div>
 
         <!-- Section 4: About MediSense -->

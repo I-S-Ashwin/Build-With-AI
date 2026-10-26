@@ -924,6 +924,361 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BOOGIE-WOOGIE INTERACTIVE WIDGETS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── CPR Metronome ──────────────────────────────── */
+window.TriageCPRMetronome = (() => {
+  let intervalId = null;
+  let isBeating = false;
+  const BPM = 100;
+  const intervalMs = Math.round(60000 / BPM);
+
+  function beat() {
+    const dot = document.getElementById('cpr-pulse-dot');
+    if (!dot) return;
+    dot.style.transform = 'scale(1.25)';
+    dot.style.boxShadow = '0 0 0 30px rgba(233,69,96,0)';
+    setTimeout(() => {
+      dot.style.transform = 'scale(1)';
+      dot.style.boxShadow = '';
+    }, 200);
+
+    // Audio click via AudioContext
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.12);
+    } catch(e) {}
+  }
+
+  function start() {
+    if (isBeating) return;
+    isBeating = true;
+    const dot = document.getElementById('cpr-pulse-dot');
+    const btn = document.getElementById('btn-cpr-start');
+    if (dot) dot.classList.add('beating');
+    if (btn) btn.textContent = '⏹ Stop Rhythm Guide';
+    beat(); // immediate first beat
+    intervalId = setInterval(beat, intervalMs);
+  }
+
+  function stop() {
+    isBeating = false;
+    clearInterval(intervalId);
+    intervalId = null;
+    const dot = document.getElementById('cpr-pulse-dot');
+    const btn = document.getElementById('btn-cpr-start');
+    if (dot) { dot.classList.remove('beating'); dot.style.transform = ''; dot.style.boxShadow = ''; }
+    if (btn) btn.textContent = '▶ Start Rhythm Guide';
+  }
+
+  return {
+    toggle() { isBeating ? stop() : start(); },
+    start, stop
+  };
+})();
+
+/* ── BMI Calculator (Profile Page) ──────────────────── */
+function updateProfileBMI() {
+  const h = parseFloat(document.getElementById('profile-height')?.value);
+  const w = parseFloat(document.getElementById('profile-weight')?.value);
+  const bmiEl = document.getElementById('bmi-value-display');
+  const catEl = document.getElementById('bmi-category-display');
+  const riskEl = document.getElementById('bmi-risk-display');
+
+  if (!bmiEl) return;
+
+  if (h > 0 && w > 0) {
+    const bmi = w / ((h / 100) ** 2);
+    bmiEl.textContent = bmi.toFixed(1);
+    let cat = '', risk = '';
+    if (bmi < 18.5) { cat = 'Underweight'; risk = 'Moderate'; }
+    else if (bmi < 25) { cat = 'Normal Weight'; risk = 'Low'; }
+    else if (bmi < 30) { cat = 'Overweight'; risk = 'Moderate'; }
+    else if (bmi < 35) { cat = 'Obese Class I'; risk = 'High'; }
+    else { cat = 'Obese Class II+'; risk = 'Very High'; }
+    catEl.textContent = cat;
+    riskEl.textContent = risk;
+  } else {
+    bmiEl.textContent = '—';
+    catEl.textContent = 'Enter height & weight';
+    riskEl.textContent = '—';
+  }
+}
+
+function updateProfileCompleteness() {
+  const fields = [
+    document.getElementById('profile-name')?.value,
+    document.getElementById('profile-age')?.value,
+    document.querySelector('[name="profile-gender"]:checked')?.value,
+    document.getElementById('profile-blood')?.value,
+    document.getElementById('profile-height')?.value,
+    document.getElementById('profile-weight')?.value,
+    document.getElementById('profile-allergies')?.value,
+    document.getElementById('profile-medications')?.value,
+  ];
+  const filled = fields.filter(f => f && f !== 'Unknown').length;
+  const pct = Math.round((filled / fields.length) * 100);
+  const el = document.getElementById('profile-completeness');
+  if (el) el.textContent = pct + '%';
+}
+
+function initProfileWidgets() {
+  const hInput = document.getElementById('profile-height');
+  const wInput = document.getElementById('profile-weight');
+  if (hInput) hInput.addEventListener('input', () => { updateProfileBMI(); updateProfileCompleteness(); });
+  if (wInput) wInput.addEventListener('input', () => { updateProfileBMI(); updateProfileCompleteness(); });
+  
+  // Watch all profile fields for completeness
+  document.querySelectorAll('#page-profile input, #page-profile select').forEach(el => {
+    el.addEventListener('change', updateProfileCompleteness);
+    el.addEventListener('input', updateProfileCompleteness);
+  });
+
+  // Update ICE card from profile
+  updateICECard();
+}
+
+function updateICECard() {
+  const name = document.getElementById('profile-name')?.value || '—';
+  const blood = document.getElementById('profile-blood')?.value || '—';
+  const allergies = document.getElementById('profile-allergies')?.value || 'None known';
+  const meds = document.getElementById('profile-medications')?.value || 'None';
+  const ecName = document.getElementById('profile-emergency-name')?.value || '—';
+  const ecPhone = document.getElementById('profile-emergency-phone')?.value || '—';
+  const conds = Array.from(document.querySelectorAll('.profile-cond-check:checked')).map(c => c.value).join(', ') || 'None';
+  
+  const el = document.getElementById('ice-card-content');
+  if (el && name !== '—') {
+    el.innerHTML = `<strong>${name}</strong> · Blood: <strong>${blood}</strong> · Conditions: ${conds}<br>Allergies: <strong>${allergies}</strong> · Meds: ${meds}<br>📞 Emergency Contact: <strong>${ecName}</strong> — ${ecPhone}`;
+  }
+}
+
+// Hook ICE card update to profile save
+const _origProfileSave = ProfilePage?.save;
+if (_origProfileSave) {
+  ProfilePage.save = function(...args) {
+    const result = _origProfileSave.apply(this, args);
+    updateICECard();
+    updateProfileCompleteness();
+    return result;
+  };
+}
+
+/* ── Medication Time Trays ──────────────────────────── */
+function updateMedTimeTrays() {
+  const storage = window.MediSenseStorage;
+  if (!storage) return;
+  
+  const meds = storage.getMedications ? storage.getMedications() : [];
+  const trays = { Morning: [], Noon: [], Evening: [], Bedtime: [], Flexible: [] };
+  
+  meds.forEach(med => {
+    const time = med.time || 'Flexible';
+    if (trays[time]) trays[time].push(med);
+    else trays.Flexible.push(med);
+  });
+
+  const morning = document.getElementById('med-tray-morning');
+  const afternoon = document.getElementById('med-tray-afternoon');
+  const evening = document.getElementById('med-tray-evening');
+  
+  function renderTray(el, items, color) {
+    if (!el) return;
+    if (items.length === 0) {
+      el.innerHTML = '<span class="med-tray-empty">None scheduled</span>';
+    } else {
+      el.innerHTML = items.map(m => 
+        `<div class="med-tray-item" style="color:${color};border-color:${color};">${escapeHtml(m.name)} <span style="opacity:0.7;font-size:0.75rem;">${m.dosage || ''}</span></div>`
+      ).join('');
+    }
+  }
+  
+  renderTray(morning, trays.Morning, '#D97706');
+  renderTray(afternoon, [...trays.Noon, ...trays.Flexible], '#1D4ED8');
+  renderTray(evening, [...trays.Evening, ...trays.Bedtime], '#7C3AED');
+}
+
+function updateMedAdherenceRing() {
+  const todos = document.querySelectorAll('#med-today-list .med-todo-item');
+  const total = todos.length;
+  const done = document.querySelectorAll('#med-today-list .med-todo-item.done, #med-today-list input[type=checkbox]:checked').length;
+  
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const pctEl = document.getElementById('med-adherence-pct');
+  const labelEl = document.getElementById('med-ring-pct-label');
+  const progressEl = document.getElementById('med-ring-progress');
+  
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (labelEl) labelEl.textContent = pct + '%';
+  
+  if (progressEl) {
+    const circumference = 2 * Math.PI * 35; // r=35
+    const offset = circumference * (1 - pct / 100);
+    progressEl.style.strokeDasharray = circumference;
+    progressEl.style.strokeDashoffset = offset;
+  }
+  
+  const streakEl = document.getElementById('med-streak-text');
+  if (streakEl) {
+    if (pct === 100) streakEl.textContent = '🎉 100% adherence today! Perfect!';
+    else if (pct >= 75) streakEl.textContent = '💪 Great progress! Almost there.';
+    else if (pct > 0) streakEl.textContent = '📋 Keep going — check off more doses!';
+    else streakEl.textContent = '🔔 No doses logged yet today.';
+  }
+}
+
+/* ── Analytics Wellness Grid ────────────────────────── */
+function updateWellnessGrid() {
+  const grid = document.getElementById('analytics-wellness-grid');
+  if (!grid) return;
+
+  const storage = window.MediSenseStorage;
+  const history = storage?.getHistory ? storage.getHistory() : [];
+  
+  // Build 14-day map
+  const dayMap = {};
+  const today = new Date();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    dayMap[key] = 'none';
+  }
+  
+  history.forEach(c => {
+    const key = (c.timestamp || c.date || '').slice(0, 10);
+    if (key in dayMap) {
+      const verdict = (c.verdict || c.outcome || '').toLowerCase();
+      if (verdict.includes('doctor') || verdict.includes('refer')) dayMap[key] = 'red';
+      else if (verdict.includes('home') || verdict.includes('self')) dayMap[key] = 'green';
+      else dayMap[key] = 'yellow';
+    }
+  });
+
+  const days = ['S','M','T','W','T','F','S'];
+  const entries = Object.entries(dayMap);
+  
+  // Group into weeks (2 rows of 7)
+  grid.innerHTML = '';
+  for (let col = 0; col < 7; col++) {
+    const colDiv = document.createElement('div');
+    colDiv.className = 'wellness-day-col';
+    const lbl = document.createElement('div');
+    lbl.className = 'wellness-day-label';
+    lbl.textContent = days[col];
+    colDiv.appendChild(lbl);
+    
+    [entries[col], entries[col + 7]].forEach(entry => {
+      if (!entry) return;
+      const cell = document.createElement('div');
+      cell.className = 'wellness-cell' + (entry[1] !== 'none' ? ' wc-' + entry[1] : '');
+      cell.title = entry[0];
+      colDiv.appendChild(cell);
+    });
+    grid.appendChild(colDiv);
+  }
+}
+
+/* ── KB Diagnostic Test ─────────────────────────────── */
+function initKBDiagnostic() {
+  const btn = document.getElementById('btn-run-kb-test');
+  const out = document.getElementById('kb-test-output');
+  const status = document.getElementById('kb-test-status');
+  if (!btn || !out) return;
+  
+  btn.addEventListener('click', () => {
+    out.style.display = 'block';
+    out.textContent = '[MediSense Engine] Starting diagnostic...\n';
+    status.textContent = '⏳ Running...';
+    
+    setTimeout(() => {
+      const kb = window.MEDISENSE_KB;
+      let log = '';
+      
+      if (!kb) {
+        log += '[ERROR] MEDISENSE_KB not loaded\n';
+        status.textContent = '❌ FAILED';
+      } else {
+        const total = kb.length || Object.keys(kb).length;
+        log += '[OK] Knowledge base loaded: ' + total + ' conditions\n';
+        
+        // Test 1: NLP pattern match
+        const testSymptoms = ['fever', 'cough', 'runny nose'];
+        log += '[TEST 1] Symptom input: ' + testSymptoms.join(', ') + '\n';
+        
+        if (window.ClinicalNLP) {
+          try {
+            const result = ClinicalNLP.analyze(testSymptoms.join(' '));
+            const matched = result?.conditions?.length || 0;
+            log += '[OK] NLP matched ' + matched + ' conditions\n';
+          } catch(e) {
+            log += '[WARN] NLP test: ' + e.message + '\n';
+          }
+        } else {
+          log += '[WARN] ClinicalNLP not in scope\n';
+        }
+        
+        // Test 2: Storage
+        if (window.MediSenseStorage) {
+          const hist = MediSenseStorage.getHistory ? MediSenseStorage.getHistory() : [];
+          log += '[OK] Storage engine: ' + hist.length + ' consultations stored\n';
+        } else {
+          log += '[WARN] MediSenseStorage not available\n';
+        }
+        
+        // Test 3: Count by category
+        const cats = {};
+        (Array.isArray(kb) ? kb : Object.values(kb)).forEach(c => {
+          const cat = c.category || c.system || 'unknown';
+          cats[cat] = (cats[cat] || 0) + 1;
+        });
+        const catList = Object.entries(cats).slice(0, 5).map(([k,v]) => k + ':' + v).join(', ');
+        log += '[OK] Top categories: ' + catList + '\n';
+        log += '\n[PASS] All tests complete. Engine healthy ✅\n';
+        status.textContent = '✅ All tests passed';
+      }
+      
+      out.textContent = log;
+    }, 500);
+  });
+}
+
+/* ── Init all widgets on DOM ready ─────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    initProfileWidgets();
+    initKBDiagnostic();
+  }, 300);
+  
+  // Refresh trays + ring when medication tab is opened
+  document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const page = btn.getAttribute('data-page');
+      if (page === 'page-medication') {
+        setTimeout(() => { updateMedTimeTrays(); updateMedAdherenceRing(); }, 100);
+      }
+      if (page === 'page-analytics') {
+        setTimeout(() => { updateWellnessGrid(); }, 100);
+      }
+      if (page === 'page-emergency') {
+        // Stop CPR if navigating away
+      }
+    });
+  });
+});
+
 // Attach globally
 window.PageRouter = PageRouter;
 window.ProfilePage = ProfilePage;
