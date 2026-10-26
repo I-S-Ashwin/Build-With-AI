@@ -568,6 +568,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderWeeklyHeatmap();
   window.renderWeeklyHeatmap = renderWeeklyHeatmap;
 
+  // Initialize Multi-Page Application Router
+  if (window.PageRouter) {
+    window.PageRouter.init();
+  }
+
   // Global helper for subsequent slices to jump to app view
   window.MediSenseApp = {
     showScreen,

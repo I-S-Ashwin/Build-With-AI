@@ -130,102 +130,697 @@
     <!-- Broadway Boogie-Woogie Animated Rhythm Ribbon -->
     <div class="boogie-ribbon" title="Broadway Boogie-Woogie Kinetic Rhythm"></div>
 
-    <!-- Wellness Dashboard: Weekly Heatmap & Energy Selector -->
-    <div class="wellness-dashboard-bar">
-      <!-- Weekly Heatmap Grid -->
-      <div class="wellness-section">
-        <span class="wellness-label">7-Day Triage Heatmap:</span>
-        <div id="wellness-heatmap-row" class="heatmap-tiles-row">
-          <!-- Rendered dynamically by main.js (Mon-Sun) -->
+    <!-- Main Navigation Bar (Mondrian Tabs) -->
+    <nav id="app-nav-bar" class="app-top-nav">
+      <button type="button" class="nav-tab-btn active" data-page="page-triage" title="Triage Consultation Chat">
+        <span class="nav-tab-icon">🩺</span>
+        <span class="nav-tab-text">Triage Chat</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-page="page-profile" title="Patient Clinical Profile">
+        <span class="nav-tab-icon">👤</span>
+        <span class="nav-tab-text">Health Profile</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-page="page-encyclopedia" title="116 Conditions Medical Encyclopedia">
+        <span class="nav-tab-icon">📖</span>
+        <span class="nav-tab-text">Encyclopedia</span>
+        <span class="nav-tab-badge">116</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-page="page-analytics" title="Health Trends & Consultation Analytics">
+        <span class="nav-tab-icon">📊</span>
+        <span class="nav-tab-text">Analytics</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-page="page-emergency" title="Emergency & Critical Care Guide">
+        <span class="nav-tab-icon">🚨</span>
+        <span class="nav-tab-text">Emergency Guide</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-page="page-medication" title="Daily Medication Tracker & Streaks">
+        <span class="nav-tab-icon">💊</span>
+        <span class="nav-tab-text">Medication Log</span>
+        <span id="nav-med-badge" class="nav-tab-badge" style="display: none;">0</span>
+      </button>
+      <button type="button" class="nav-tab-btn" data-page="page-settings" title="System Settings & Export">
+        <span class="nav-tab-icon">⚙️</span>
+        <span class="nav-tab-text">Settings</span>
+      </button>
+    </nav>
+
+    <!-- Page 1: Triage Consultation (Default Active View) -->
+    <div id="page-triage" class="app-page active-page">
+      <!-- Wellness Dashboard: Weekly Heatmap & Energy Selector -->
+      <div class="wellness-dashboard-bar">
+        <!-- Weekly Heatmap Grid -->
+        <div class="wellness-section">
+          <span class="wellness-label">7-Day Triage Heatmap:</span>
+          <div id="wellness-heatmap-row" class="heatmap-tiles-row">
+            <!-- Rendered dynamically by main.js (Mon-Sun) -->
+          </div>
+        </div>
+
+        <!-- Energy Level Selector -->
+        <div class="wellness-section">
+          <span class="wellness-label">Current Energy:</span>
+          <div class="energy-tags-group">
+            <button type="button" class="btn-energy-tag active" data-energy="active" title="High physical readiness">⚡ Active</button>
+            <button type="button" class="btn-energy-tag" data-energy="moderate" title="Moderate energy">🧘 Resting</button>
+            <button type="button" class="btn-energy-tag" data-energy="fatigued" title="Low energy / worn down">😴 Fatigued</button>
+          </div>
         </div>
       </div>
 
-      <!-- Energy Level Selector -->
-      <div class="wellness-section">
-        <span class="wellness-label">Current Energy:</span>
-        <div class="energy-tags-group">
-          <button type="button" class="btn-energy-tag active" data-energy="active" title="High physical readiness">⚡ Active</button>
-          <button type="button" class="btn-energy-tag" data-energy="moderate" title="Moderate energy">🧘 Resting</button>
-          <button type="button" class="btn-energy-tag" data-energy="fatigued" title="Low energy / worn down">😴 Fatigued</button>
+      <!-- Main Workspace Grid -->
+      <div class="app-layout-grid">
+        <!-- Chat Workspace Area -->
+        <main class="chat-workspace">
+          <!-- Message stream -->
+          <div id="chat-messages-container" class="conversation-scroll-area">
+            <div id="chat-empty-notice" class="empty-chat-state">
+              <div class="mondrian-icon">
+                <div></div><div></div><div></div><div></div>
+              </div>
+              <h3>How are you feeling today?</h3>
+              <p>
+                Tap the <strong>red microphone</strong> below to speak your symptoms, or type in the box. 
+                MediSense will ask a few guided questions before providing a calm suggestion or doctor recommendation.
+              </p>
+            </div>
+            <!-- Dynamic conversation bubbles will append here in Slice 2 -->
+          </div>
+
+          <!-- Live Voice Speech Transcript Preview Banner with Sound Meter -->
+          <div id="live-voice-preview" class="voice-transcript-banner" style="display: none;">
+            <span class="live-dot"></span>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <span id="live-voice-text">Listening... Speak clearly</span>
+              <!-- Live hardware sound level bar -->
+              <div style="height: 6px; width: 100%; max-width: 240px; background: rgba(0,0,0,0.15); border: 1px solid var(--mondrian-black);">
+                <div id="mic-volume-bar" style="height: 100%; width: 5%; background: var(--mondrian-red); transition: width 0.08s ease;"></div>
+              </div>
+            </div>
+            <button type="button" onclick="window.VoiceService.stop(true)" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Done Speaking &rarr;</button>
+          </div>
+
+          <!-- Quick Sample Symptom Chips for Instant Testing -->
+          <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; padding: 0.5rem 1rem 0; max-width: 760px; width: 100%;">
+            <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I have a cold with a mild cough and runny nose'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">🤒 Routine Cold</button>
+            <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I got a minor scratch on my arm while playing basketball'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">🩹 Minor Scratch</button>
+            <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I have been sweating quite a lot and feeling very unwell with chest pressure'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">⚠️ Sweating &amp; Chest Pain</button>
+          </div>
+
+          <!-- Chat Input Bar (Bottom Center Focused) -->
+          <div class="chat-input-bar">
+            <div class="voice-control-center">
+              <button id="btn-mic-record" class="btn-mic" aria-label="Start Voice Recording" title="Tap to speak your symptoms">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            <span id="mic-status-text" class="mic-status-label">Tap microphone to speak symptoms</span>
+
+            <form id="form-chat-text" class="text-fallback-row">
+              <input type="text" id="input-symptoms-text" placeholder="Or type what's happening (e.g. I have a cold and mild headache)..." autocomplete="off">
+              <button type="submit" class="btn btn-secondary" style="padding: 0.75rem 1.25rem;">Send</button>
+            </form>
+          </div>
+        </main>
+
+        <!-- Right Sidebar: Chat History Bin -->
+        <aside class="history-sidebar">
+          <div class="sidebar-header">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <h3>Chat Bin</h3>
+              <span id="session-count-badge" style="font-size: 0.8rem; font-weight: 800; background: var(--mondrian-black); color: white; padding: 2px 8px;">0</span>
+            </div>
+            <button type="button" onclick="location.reload()" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Start fresh consultation">+ New</button>
+          </div>
+          <div id="history-sessions-list" class="history-bin-list">
+            <div class="history-empty-notice">
+              No saved consultations yet. Completed triage sessions will be archived here.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Page 2: Health Profile -->
+    <div id="page-profile" class="app-page">
+      <div class="page-container-centered">
+        <div class="page-title-banner">
+          <div class="mini-mondrian">
+            <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+          </div>
+          <div>
+            <h2>Patient Clinical Profile</h2>
+            <p>Your physiological baseline and medical history actively calibrate the triage engine's risk thresholds.</p>
+          </div>
+        </div>
+
+        <div id="profile-toast" class="profile-toast-banner" style="display: none;"></div>
+
+        <!-- Active Summary Card -->
+        <div id="profile-active-summary" class="profile-summary-box">
+          <!-- Rendered dynamically by ProfilePage.render() -->
+        </div>
+
+        <!-- Profile Form Card -->
+        <div class="profile-form-card">
+          <form id="form-profile">
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label for="profile-name">Full Name or Preferred Alias</label>
+                <input type="text" id="profile-name" class="input-text" placeholder="e.g. Sarah Connor" required autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="profile-age">Age (Years)</label>
+                <input type="number" id="profile-age" class="input-text" placeholder="e.g. 34" min="1" max="120" required autocomplete="off">
+              </div>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label>Biological Gender</label>
+                <div class="radio-options-row">
+                  <label class="radio-label"><input type="radio" name="profile-gender" value="Female"> Female</label>
+                  <label class="radio-label"><input type="radio" name="profile-gender" value="Male"> Male</label>
+                  <label class="radio-label"><input type="radio" name="profile-gender" value="Non-binary"> Other</label>
+                  <label class="radio-label"><input type="radio" name="profile-gender" value="Prefer not to say"> Private</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="profile-blood">Blood Type</label>
+                <select id="profile-blood" class="input-text" style="font-weight: 700;">
+                  <option value="Unknown">Unknown / Not Tested</option>
+                  <option value="O+">O Positive (O+)</option>
+                  <option value="O-">O Negative (O-)</option>
+                  <option value="A+">A Positive (A+)</option>
+                  <option value="A-">A Negative (A-)</option>
+                  <option value="B+">B Positive (B+)</option>
+                  <option value="B-">B Negative (B-)</option>
+                  <option value="AB+">AB Positive (AB+)</option>
+                  <option value="AB-">AB Negative (AB-)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+              <label>Diagnosed Chronic Conditions (Informs AI Triage Matching)</label>
+              <div class="checkbox-options-grid">
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Diabetes"> Diabetes (Type 1 or 2)</label>
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Hypertension"> Hypertension (High BP)</label>
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Asthma"> Asthma / Reactive Airway</label>
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Coronary Heart Disease"> Heart Disease</label>
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Thyroid Condition"> Thyroid Condition</label>
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Kidney Disease"> Chronic Kidney Disease</label>
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Migraine"> Chronic Migraine</label>
+                <label class="checkbox-label"><input type="checkbox" class="profile-cond-check" value="Eczema"> Eczema / Dermatitis</label>
+              </div>
+              <input type="text" id="profile-cond-other" class="input-text" placeholder="Other conditions (comma separated)..." style="margin-top: 0.5rem;" autocomplete="off">
+            </div>
+
+            <div class="form-row-2col" style="margin-top: 1rem;">
+              <div class="form-group">
+                <label for="profile-allergies">Known Drug &amp; Environmental Allergies</label>
+                <input type="text" id="profile-allergies" class="input-text" placeholder="e.g. Penicillin, Sulfa, Peanuts, Latex" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="profile-medications">Current Regular Medications</label>
+                <input type="text" id="profile-medications" class="input-text" placeholder="e.g. Metformin 500mg, Albuterol inhaler" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="form-row-2col" style="margin-top: 1rem;">
+              <div class="form-group">
+                <label for="profile-emergency-name">Emergency Contact Name</label>
+                <input type="text" id="profile-emergency-name" class="input-text" placeholder="e.g. John Connor (Spouse)" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="profile-emergency-phone">Emergency Contact Phone</label>
+                <input type="tel" id="profile-emergency-phone" class="input-text" placeholder="e.g. +1 (555) 019-2831" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="form-actions" style="margin-top: 1.5rem; justify-content: space-between;">
+              <button type="button" id="btn-profile-clear" class="btn btn-secondary" style="color: var(--mondrian-red); border-color: var(--mondrian-red);">
+                🗑️ Clear Profile
+              </button>
+              <button type="submit" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.8rem 2rem;">
+                💾 Save Health Profile &rarr;
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
-    <!-- Main Workspace Grid -->
-    <div class="app-layout-grid">
-      <!-- Chat Workspace Area -->
-      <main class="chat-workspace">
-        <!-- Message stream -->
-        <div id="chat-messages-container" class="conversation-scroll-area">
-          <div id="chat-empty-notice" class="empty-chat-state">
-            <div class="mondrian-icon">
-              <div></div><div></div><div></div><div></div>
+    <!-- Page 3: Disease Encyclopedia (116 Conditions) -->
+    <div id="page-encyclopedia" class="app-page">
+      <div class="encyc-header-strip">
+        <div class="encyc-title-group">
+          <h2>Medical Knowledge Base &amp; Encyclopedia</h2>
+          <p>Browse 116 clinically structured conditions extracted from patient profile datasets. Fully available offline.</p>
+        </div>
+        <div class="encyc-search-bar">
+          <input type="text" id="encyc-search-input" class="input-text" placeholder="🔍 Search conditions, symptoms, keywords (e.g. asthma, chest, rash)..." autocomplete="off">
+          <span id="encyc-result-count" class="encyc-count-pill">Showing 116 conditions</span>
+        </div>
+      </div>
+
+      <!-- Category Filter Chips -->
+      <div class="encyc-category-chips-bar">
+        <button type="button" class="encyc-filter-chip active" data-category="all">All Conditions (116)</button>
+        <button type="button" class="encyc-filter-chip" data-category="respiratory">Respiratory</button>
+        <button type="button" class="encyc-filter-chip" data-category="cardiovascular">Cardiovascular</button>
+        <button type="button" class="encyc-filter-chip" data-category="neurological">Neurological</button>
+        <button type="button" class="encyc-filter-chip" data-category="digestive">Digestive</button>
+        <button type="button" class="encyc-filter-chip" data-category="infectious">Infectious</button>
+        <button type="button" class="encyc-filter-chip" data-category="musculoskeletal">Musculoskeletal</button>
+        <button type="button" class="encyc-filter-chip" data-category="mental_health">Mental Health</button>
+        <button type="button" class="encyc-filter-chip" data-category="metabolic">Metabolic</button>
+        <button type="button" class="encyc-filter-chip" data-category="endocrine">Endocrine</button>
+        <button type="button" class="encyc-filter-chip" data-category="dermatological">Dermatological</button>
+        <button type="button" class="encyc-filter-chip" data-category="oncological">Oncological</button>
+        <button type="button" class="encyc-filter-chip" data-category="urological">Urological</button>
+        <button type="button" class="encyc-filter-chip" data-category="ENT">ENT</button>
+        <button type="button" class="encyc-filter-chip" data-category="ophthalmological">Eye / Vision</button>
+      </div>
+
+      <!-- Grid of Disease Cards -->
+      <div id="encyc-grid-container" class="encyc-cards-grid">
+        <!-- Rendered dynamically by EncyclopediaPage.renderCards() -->
+      </div>
+    </div>
+
+    <!-- Page 4: Analytics Dashboard -->
+    <div id="page-analytics" class="app-page">
+      <div class="page-container-centered" style="max-width: 1100px;">
+        <div class="page-title-banner">
+          <div class="mini-mondrian">
+            <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+          </div>
+          <div>
+            <h2>Health Trends &amp; Triage Analytics</h2>
+            <p>Visual retrospective of your consultation frequency, primary symptom patterns, and resolution ratios.</p>
+          </div>
+        </div>
+
+        <!-- 4 Top Metric Tiles -->
+        <div class="analytics-metrics-grid">
+          <div class="metric-card card-total">
+            <span class="metric-label">Total Consultations</span>
+            <strong id="stat-total-consultations" class="metric-value">0</strong>
+            <span class="metric-sub">Across all recorded sessions</span>
+          </div>
+          <div class="metric-card card-home">
+            <span class="metric-label">Home Remedies Managed</span>
+            <strong id="stat-home-remedies" class="metric-value">0 (0%)</strong>
+            <span class="metric-sub">Mild viral &amp; minor issues</span>
+          </div>
+          <div class="metric-card card-doctor">
+            <span class="metric-label">Doctor Referrals</span>
+            <strong id="stat-doctor-visits" class="metric-value">0 (0%)</strong>
+            <span class="metric-sub">Escalated for clinical safety</span>
+          </div>
+          <div class="metric-card card-week">
+            <span class="metric-label">Recent Activity</span>
+            <strong id="stat-week-consultations" class="metric-value">0 this week</strong>
+            <span class="metric-sub">7-day rolling window</span>
+          </div>
+        </div>
+
+        <!-- Visual Outcome Ratio Bar -->
+        <div class="analytics-section-card" style="margin-top: 1.5rem;">
+          <h3 style="margin: 0 0 0.5rem; font-size: 1.15rem;">Triage Outcome Ratio</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem;">Comparison between self-care recommendations vs. professional physician escalations.</p>
+          
+          <div class="outcome-split-bar">
+            <div id="split-bar-home" class="split-segment segment-home" style="width: 50%;">Home Care</div>
+            <div id="split-bar-doctor" class="split-segment segment-doctor" style="width: 50%;">Doctor Referral</div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 800; margin-top: 0.4rem;">
+            <span style="color: var(--mondrian-yellow);">🟡 Safe Home Recovery</span>
+            <span style="color: var(--mondrian-red);">🔴 Clinical Examination Directed</span>
+          </div>
+        </div>
+
+        <div class="analytics-2col-layout" style="margin-top: 1.5rem;">
+          <!-- Left: Top Symptoms Bar Chart -->
+          <div class="analytics-section-card">
+            <h3 style="margin: 0 0 0.35rem; font-size: 1.15rem;">Most Frequent Reported Symptoms</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem;">Frequency of clinical indicators detected across your consultations.</p>
+            <div id="analytics-symptom-chart" class="symptom-bars-list">
+              <!-- Rendered dynamically by AnalyticsPage -->
             </div>
-            <h3>How are you feeling today?</h3>
-            <p>
-              Tap the <strong>red microphone</strong> below to speak your symptoms, or type in the box. 
-              MediSense will ask a few guided questions before providing a calm suggestion or doctor recommendation.
+          </div>
+
+          <!-- Right: Consultations Timeline -->
+          <div class="analytics-section-card">
+            <h3 style="margin: 0 0 0.35rem; font-size: 1.15rem;">Consultation Timeline</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem;">Log of recent health interactions and diagnosis summaries.</p>
+            <div id="analytics-timeline-list" class="timeline-list-container">
+              <!-- Rendered dynamically by AnalyticsPage -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 5: Emergency Protocols -->
+    <div id="page-emergency" class="app-page">
+      <div class="page-container-centered" style="max-width: 1100px;">
+        <!-- Pulsing Red Alert Banner -->
+        <div class="emergency-alert-banner">
+          <div class="emergency-alert-icon">🚨</div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 900;">IMMEDIATE LIFE-THREATENING EMERGENCY?</h3>
+            <p style="margin: 0.25rem 0 0; font-size: 0.95rem;">
+              Do not use an app for heart attacks, severe breathing loss, stroke, or traumatic injury. Call emergency responders immediately.
             </p>
           </div>
-          <!-- Dynamic conversation bubbles will append here in Slice 2 -->
         </div>
 
-        <!-- Live Voice Speech Transcript Preview Banner with Sound Meter -->
-        <div id="live-voice-preview" class="voice-transcript-banner" style="display: none;">
-          <span class="live-dot"></span>
-          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-            <span id="live-voice-text">Listening... Speak clearly</span>
-            <!-- Live hardware sound level bar -->
-            <div style="height: 6px; width: 100%; max-width: 240px; background: rgba(0,0,0,0.15); border: 1px solid var(--mondrian-black);">
-              <div id="mic-volume-bar" style="height: 100%; width: 5%; background: var(--mondrian-red); transition: width 0.08s ease;"></div>
+        <!-- Emergency Dial Box + Personal Contact -->
+        <div class="emergency-contacts-row">
+          <div class="emergency-dials-box">
+            <h4>Direct Emergency Services Dispatch</h4>
+            <div class="dial-buttons-grid">
+              <a href="tel:911" class="btn-dial dial-us"><strong>911</strong> <span>USA / Canada</span></a>
+              <a href="tel:112" class="btn-dial dial-eu"><strong>112</strong> <span>Europe / India</span></a>
+              <a href="tel:999" class="btn-dial dial-uk"><strong>999</strong> <span>United Kingdom</span></a>
+              <a href="tel:000" class="btn-dial dial-au"><strong>000</strong> <span>Australia</span></a>
             </div>
           </div>
-          <button type="button" onclick="window.VoiceService.stop(true)" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">Done Speaking &rarr;</button>
+          <div id="emergency-personal-contact">
+            <!-- Rendered dynamically from profile -->
+          </div>
         </div>
 
-        <!-- Quick Sample Symptom Chips for Instant Testing -->
-        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; padding: 0.5rem 1rem 0; max-width: 760px; width: 100%;">
-          <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I have a cold with a mild cough and runny nose'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">🤒 Routine Cold</button>
-          <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I got a minor scratch on my arm while playing basketball'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">🩹 Minor Scratch</button>
-          <button type="button" class="symptom-chip" onclick="document.getElementById('input-symptoms-text').value='I have been sweating quite a lot and feeling very unwell with chest pressure'; document.getElementById('form-chat-text').dispatchEvent(new Event('submit'));">⚠️ Sweating &amp; Chest Pain</button>
+        <h3 style="margin: 2rem 0 1rem; font-size: 1.3rem; font-weight: 900;">Critical First Responder Action Protocols</h3>
+
+        <!-- Emergency Protocols Grid -->
+        <div class="emergency-protocols-grid">
+          <!-- Protocol 1: Heart Attack -->
+          <article class="emergency-card card-cardio">
+            <div class="emergency-card-accent"></div>
+            <div class="emergency-card-body">
+              <span class="emergency-category-tag">CARDIOVASCULAR CRISIS</span>
+              <h3>🫀 Heart Attack Protocol</h3>
+              <p class="emergency-signs"><strong>Signs:</strong> Crushing chest tightness, pain radiating down left arm or jaw, cold sweats, breathlessness, nausea.</p>
+              <ol class="emergency-steps">
+                <li><strong>CALL 911 / 112 IMMEDIATELY.</strong> Do not drive yourself.</li>
+                <li><strong>Chew one adult Aspirin (325mg)</strong> or two low-dose baby aspirins (if not allergic). Chewing speeds absorption.</li>
+                <li><strong>Sit upright</strong> with knees bent and back supported to reduce strain on the heart muscle.</li>
+                <li>Loosen all tight clothing around the neck, chest, and waist.</li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- Protocol 2: Stroke FAST -->
+          <article class="emergency-card card-neuro">
+            <div class="emergency-card-accent"></div>
+            <div class="emergency-card-body">
+              <span class="emergency-category-tag">NEUROLOGICAL CRISIS</span>
+              <h3>🧠 Stroke F.A.S.T. Protocol</h3>
+              <p class="emergency-signs"><strong>Signs:</strong> Sudden facial weakness, inability to raise both arms, garbled or slurred speech, sudden loss of vision.</p>
+              <ol class="emergency-steps">
+                <li><strong>F — Face:</strong> Ask them to smile. Does one side of the face droop?</li>
+                <li><strong>A — Arms:</strong> Ask them to raise both arms. Does one arm drift downward?</li>
+                <li><strong>S — Speech:</strong> Ask them to repeat a simple sentence. Is speech slurred or strange?</li>
+                <li><strong>T — Time:</strong> Call 911/112 IMMEDIATELY! Note the exact minute symptoms began. Clot-busting medication must be given within 3–4.5 hours.</li>
+                <li><strong>DO NOT</strong> give food, water, or medication (swallowing may be impaired).</li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- Protocol 3: Choking -->
+          <article class="emergency-card card-resp">
+            <div class="emergency-card-accent"></div>
+            <div class="emergency-card-body">
+              <span class="emergency-category-tag">AIRWAY OBSTRUCTION</span>
+              <h3>😮 Choking (Heimlich Maneuver)</h3>
+              <p class="emergency-signs"><strong>Signs:</strong> Hands clutched to throat (universal choking sign), inability to speak, cough, or breathe; lips turning blue.</p>
+              <ol class="emergency-steps">
+                <li><strong>Stand behind the person</strong> and wrap your arms around their waist.</li>
+                <li><strong>Make a fist</strong> with one hand. Place the thumb side slightly above the navel, well below the breastbone.</li>
+                <li><strong>Grasp fist with other hand</strong> and press hard into the abdomen with a quick, upward thrust.</li>
+                <li>Repeat thrusts until the object is expelled or the person becomes unresponsive.</li>
+                <li>If unconscious: lower gently to floor and begin CPR chest compressions.</li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- Protocol 4: CPR -->
+          <article class="emergency-card card-cpr">
+            <div class="emergency-card-accent"></div>
+            <div class="emergency-card-body">
+              <span class="emergency-category-tag">CARDIOPULMONARY RESUSCITATION</span>
+              <h3>💓 Adult CPR (Hands-Only)</h3>
+              <p class="emergency-signs"><strong>Signs:</strong> Person is collapsed, unresponsive, and not breathing or only gasping occasionally.</p>
+              <ol class="emergency-steps">
+                <li><strong>Check response:</strong> Tap shoulders firmly and shout "Are you OK?"</li>
+                <li><strong>Call 911 / 112</strong> and put on speakerphone. Send someone for an AED.</li>
+                <li><strong>Hand placement:</strong> Place heel of one hand on center of chest; interlock other hand on top. Keep elbows locked straight.</li>
+                <li><strong>Compress:</strong> Push hard and fast (at least 2 inches deep) at 100–120 beats per minute (tempo of "Stayin' Alive").</li>
+                <li>Allow full chest recoil between compressions. Do not stop until paramedics arrive or AED is ready.</li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- Protocol 5: Severe Hemorrhage -->
+          <article class="emergency-card card-bleed">
+            <div class="emergency-card-accent"></div>
+            <div class="emergency-card-body">
+              <span class="emergency-category-tag">TRAUMA &amp; HEMORRHAGE</span>
+              <h3>🩸 Severe Bleeding Control</h3>
+              <p class="emergency-signs"><strong>Signs:</strong> Blood spurting or flowing continuously from a wound, pooling on the floor, soaking through clothes.</p>
+              <ol class="emergency-steps">
+                <li><strong>Apply immediate direct pressure:</strong> Cover the wound with clean gauze, cloth, or your hands and push down firmly.</li>
+                <li><strong>Do NOT remove soaked dressings:</strong> Add additional layers directly on top and maintain constant heavy pressure.</li>
+                <li><strong>Elevate:</strong> If on an extremity and no broken bones suspected, raise above heart level.</li>
+                <li>Keep pressure held continuously until emergency medical personnel take over.</li>
+              </ol>
+            </div>
+          </article>
+
+          <!-- Protocol 6: Seizures & Anaphylaxis -->
+          <article class="emergency-card card-allergy">
+            <div class="emergency-card-accent"></div>
+            <div class="emergency-card-body">
+              <span class="emergency-category-tag">ACUTE ANAPHYLAXIS &amp; SEIZURE</span>
+              <h3>⚡ Seizure &amp; Severe Allergy</h3>
+              <p class="emergency-signs"><strong>Anaphylaxis:</strong> Swollen tongue/throat, hives, wheezing, dizziness after exposure to allergen. <strong>Seizure:</strong> Involuntary convulsions.</p>
+              <ol class="emergency-steps">
+                <li><strong>For Anaphylaxis:</strong> Administer EpiPen into the outer thigh immediately. Hold firmly for 3–5 seconds. Call 911.</li>
+                <li><strong>For Seizure:</strong> Clear all sharp and hard objects away from the area. Place something soft under their head.</li>
+                <li><strong>NEVER put anything into their mouth</strong> and do not restrain their movements.</li>
+                <li>Once convulsions end, roll them gently onto their side (recovery position) to keep airway open.</li>
+              </ol>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 6: Medication Log & Daily To-Do Tracker -->
+    <div id="page-medication" class="app-page">
+      <div class="page-container-centered" style="max-width: 1100px;">
+        <div class="page-title-banner">
+          <div class="mini-mondrian">
+            <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+          </div>
+          <div>
+            <h2>Daily Medication Tracker &amp; To-Do Log</h2>
+            <p>Track your daily prescriptions and supplements. Check off doses to build consecutive consistency streaks.</p>
+          </div>
         </div>
 
-        <!-- Chat Input Bar (Bottom Center Focused) -->
-        <div class="chat-input-bar">
-          <div class="voice-control-center">
-            <button id="btn-mic-record" class="btn-mic" aria-label="Start Voice Recording" title="Tap to speak your symptoms">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                <line x1="12" y1="19" x2="12" y2="23"></line>
-                <line x1="8" y1="23" x2="16" y2="23"></line>
-              </svg>
+        <div class="med-layout-grid">
+          <!-- Left Column: Today's Checklist -->
+          <div class="med-checklist-panel">
+            <div class="checklist-header">
+              <div>
+                <h3 id="med-today-date" style="margin: 0; font-size: 1.25rem;">Today's Schedule</h3>
+                <span id="med-today-progress" class="checklist-progress-text">0 scheduled</span>
+              </div>
+              <span class="live-dot" title="Live daily tracker"></span>
+            </div>
+
+            <!-- List of today's medication items -->
+            <div id="med-today-list" class="med-todos-container">
+              <!-- Rendered dynamically by MedicationPage -->
+            </div>
+          </div>
+
+          <!-- Right Column: Add & Manage Medications -->
+          <div class="med-manage-panel">
+            <div class="med-form-card">
+              <h3 style="margin: 0 0 0.5rem; font-size: 1.15rem;">+ Add Tracked Medication</h3>
+              <form id="form-add-medication">
+                <div class="form-group">
+                  <label for="med-input-name">Medication or Supplement Name</label>
+                  <input type="text" id="med-input-name" class="input-text" placeholder="e.g. Amoxicillin, Vitamin D3, Metformin" required autocomplete="off">
+                </div>
+
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label for="med-input-dosage">Dosage / Quantity</label>
+                    <input type="text" id="med-input-dosage" class="input-text" placeholder="e.g. 500mg, 1 tablet" autocomplete="off">
+                  </div>
+                  <div class="form-group">
+                    <label for="med-input-freq">Frequency</label>
+                    <select id="med-input-freq" class="input-text" style="font-weight: 700;">
+                      <option value="Once daily">Once daily</option>
+                      <option value="Twice daily">Twice daily</option>
+                      <option value="Three times daily">Three times daily</option>
+                      <option value="As needed">As needed (PRN)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label for="med-input-time">Scheduled Time</label>
+                    <select id="med-input-time" class="input-text" style="font-weight: 700;">
+                      <option value="Morning">Morning (Breakfast)</option>
+                      <option value="Noon">Noon (Lunch)</option>
+                      <option value="Evening">Evening (Dinner)</option>
+                      <option value="Bedtime">Bedtime / Night</option>
+                      <option value="Flexible">Anytime during day</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="med-input-notes">Notes / Instructions</label>
+                    <input type="text" id="med-input-notes" class="input-text" placeholder="e.g. Take with full glass of water" autocomplete="off">
+                  </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 1rem; justify-content: flex-end;">
+                  <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.4rem;">
+                    + Save to Medication List
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- List of All Registered Meds with Delete Option -->
+            <div class="med-all-card" style="margin-top: 1.25rem;">
+              <h4 style="margin: 0 0 0.5rem; font-size: 1rem;">All Active Medications</h4>
+              <div id="med-all-list">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page 7: Settings & Data Portability -->
+    <div id="page-settings" class="app-page">
+      <div class="page-container-centered" style="max-width: 900px;">
+        <div class="page-title-banner">
+          <div class="mini-mondrian">
+            <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+          </div>
+          <div>
+            <h2>MediSense System Settings &amp; Data</h2>
+            <p>Configure intelligence models, appearance, privacy preferences, and export your personal health records.</p>
+          </div>
+        </div>
+
+        <!-- Section 1: AI Engine & Intelligence Mode -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <h3>🤖 Clinical Intelligence Engine</h3>
+            <span id="settings-ai-mode-badge" class="triage-outcome-tag tag-doctor">Loading mode...</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+            MediSense functions in two modes: Cloud Generative Triage via Google Gemini 1.5 Flash, or 100% Offline via the 116-disease clinical knowledge base.
+          </p>
+
+          <div class="form-group">
+            <label for="settings-input-key">Google Gemini API Key</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="password" id="settings-input-key" class="input-text" placeholder="Paste AIzaSy... key or leave empty for offline mode" autocomplete="off" style="flex: 1;">
+              <button type="button" id="settings-btn-save-key" class="btn btn-primary">Save Key</button>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+              Free keys available from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--mondrian-blue); font-weight: 700;">Google AI Studio</a>. Saved exclusively in your browser.
+            </p>
+          </div>
+        </div>
+
+        <!-- Section 2: Appearance & Display Preferences -->
+        <div class="settings-card" style="margin-top: 1.5rem;">
+          <h3>🎨 Display &amp; Visual Rhythm</h3>
+          <div class="settings-action-row">
+            <div>
+              <strong>Color Palette Theme</strong>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Toggle between Piet Mondrian Classic Light and Broadway Dark</div>
+            </div>
+            <button type="button" class="btn btn-theme-toggle theme-toggle-btn" style="padding: 0.5rem 1.25rem;">🌙 Dark Mode</button>
+          </div>
+        </div>
+
+        <!-- Section 3: Data Privacy & Backup -->
+        <div class="settings-card" style="margin-top: 1.5rem;">
+          <h3>🔒 Data Ownership &amp; Privacy</h3>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+            All your consultations, wellness heatmap records, and medications are stored 100% locally on this computer. Zero analytics or server sync.
+          </p>
+
+          <div class="settings-action-row" style="border-bottom: var(--border-thin); padding-bottom: 0.85rem; margin-bottom: 0.85rem;">
+            <div>
+              <strong>Current Storage Footprint</strong>
+              <div id="settings-storage-summary" style="font-size: 0.85rem; color: var(--text-muted);">Calculating...</div>
+            </div>
+            <button type="button" id="settings-btn-export-data" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">
+              📥 Export All Data (JSON)
             </button>
           </div>
-          <span id="mic-status-text" class="mic-status-label">Tap microphone to speak symptoms</span>
 
-          <form id="form-chat-text" class="text-fallback-row">
-            <input type="text" id="input-symptoms-text" placeholder="Or type what's happening (e.g. I have a cold and mild headache)..." autocomplete="off">
-            <button type="submit" class="btn btn-secondary" style="padding: 0.75rem 1.25rem;">Send</button>
-          </form>
-        </div>
-      </main>
-
-      <!-- Right Sidebar: Chat History Bin -->
-      <aside class="history-sidebar">
-        <div class="sidebar-header">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <h3>Chat Bin</h3>
-            <span id="session-count-badge" style="font-size: 0.8rem; font-weight: 800; background: var(--mondrian-black); color: white; padding: 2px 8px;">0</span>
+          <div class="settings-action-row" style="border-bottom: var(--border-thin); padding-bottom: 0.85rem; margin-bottom: 0.85rem;">
+            <div>
+              <strong>Clear Consultation Chat Bin</strong>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Deletes all archived triage sessions while preserving your profile and medications</div>
+            </div>
+            <button type="button" id="settings-btn-clear-history" class="btn btn-secondary" style="color: var(--mondrian-red); border-color: var(--mondrian-red);">
+              🗑️ Clear History
+            </button>
           </div>
-          <button type="button" onclick="location.reload()" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Start fresh consultation">+ New</button>
-        </div>
-        <div id="history-sessions-list" class="history-bin-list">
-          <div class="history-empty-notice">
-            No saved consultations yet. Completed triage sessions will be archived here.
+
+          <div class="settings-action-row">
+            <div>
+              <strong style="color: var(--mondrian-red);">Factory Reset MediSense</strong>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Completely wipes all local profile, medication, and consultation data</div>
+            </div>
+            <button type="button" id="settings-btn-factory-reset" class="btn btn-secondary" style="background: #FFEBEE; color: var(--mondrian-red); border-color: var(--mondrian-red);">
+              ⚠️ Reset All Data
+            </button>
           </div>
         </div>
-      </aside>
+
+        <!-- Section 4: About MediSense -->
+        <div class="settings-card" style="margin-top: 1.5rem;">
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="mini-mondrian" style="width: 48px; height: 48px;">
+              <div class="r"></div><div class="y"></div><div class="w"></div><div class="b"></div>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.2rem;">MediSense v1.2.0</h3>
+              <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-muted);">
+                Created for <strong>Build With AI: Basics</strong> Devpost Learning Hackathon
+              </p>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; font-size: 0.85rem; line-height: 1.55; color: var(--text-main);">
+            <p><strong>Clinical Knowledge Base:</strong> 116 curated diseases and triage recommendations extracted from the Kaggle Disease Symptom and Patient Profile Dataset.</p>
+            <p><strong>Speech-to-Text:</strong> On-device OpenAI Whisper-tiny via Transformers.js (WebAssembly) with hardware MediaRecorder + Gemini multimodal fallback.</p>
+            <p><strong>Design System:</strong> Inspired by Piet Mondrian's Neo-Plasticism and <em>Broadway Boogie-Woogie</em> (1942–43).</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -343,6 +938,45 @@
     </div>
   </div>
 
+  <!-- Disease Detail Modal (Encyclopedia) -->
+  <div id="modal-disease-detail" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="login-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+        <div>
+          <span id="disease-modal-category" class="category-tag tag-general" style="margin-bottom: 4px; display: inline-block;">CATEGORY</span>
+          <h2 id="disease-modal-title" style="font-size: 1.5rem; margin: 0.25rem 0;">Condition Name</h2>
+          <div id="disease-modal-urgency" class="triage-outcome-tag tag-home" style="font-size: 0.8rem; margin: 0.25rem 0 0;">Urgency: Moderate</div>
+        </div>
+        <button type="button" id="btn-close-disease-modal" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;">&times;</button>
+      </div>
+
+      <div style="max-height: 60vh; overflow-y: auto; padding-right: 0.5rem;">
+        <div style="margin-bottom: 1rem;">
+          <h4 style="margin: 0 0 0.35rem; font-size: 0.95rem; font-weight: 800;">Recommended Clinical Action:</h4>
+          <p id="disease-modal-advice" style="font-size: 0.95rem; line-height: 1.5; color: var(--text-main); margin: 0;">Advice text...</p>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <h4 style="margin: 0 0 0.35rem; font-size: 0.95rem; font-weight: 800;">Typical Clinical Presentation:</h4>
+          <ul id="disease-modal-symptoms" style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; line-height: 1.5;">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+
+        <div style="padding: 0.75rem 1rem; border-left: 4px solid var(--mondrian-red); background: var(--bg-subtle);">
+          <h4 style="margin: 0 0 0.35rem; font-size: 0.95rem; font-weight: 800; color: var(--mondrian-red);">Critical Red Flags (Escalate to Doctor / ER):</h4>
+          <ul id="disease-modal-redflags" style="margin: 0; padding-left: 1.25rem; font-size: 0.9rem; line-height: 1.5; color: var(--text-main);">
+            <!-- Rendered dynamically -->
+          </ul>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top: 1.25rem; justify-content: flex-end;">
+        <button type="button" onclick="document.getElementById('modal-disease-detail').classList.remove('active')" class="btn btn-primary">Done Reading</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="config.js"></script>
   <script src="storage.js"></script>
@@ -352,6 +986,7 @@
   <script src="history.js"></script>
   <script src="tutorial.js"></script>
   <script type="module" src="whisper-local.js"></script>
+  <script src="pages.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

@@ -22,6 +22,24 @@ GUIDELINES:
     return (localKey && localKey.trim()) || (configKey && configKey.trim()) || '';
   },
 
+  getProfileContext() {
+    try {
+      const p = window.Storage ? window.Storage.getProfile() : JSON.parse(localStorage.getItem('medisense_profile') || 'null');
+      if (!p) return '';
+      const parts = [];
+      if (p.name) parts.push(`Name: ${p.name}`);
+      if (p.age) parts.push(`Age: ${p.age}`);
+      if (p.gender) parts.push(`Gender: ${p.gender}`);
+      if (p.bloodType && p.bloodType !== 'Unknown') parts.push(`Blood Type: ${p.bloodType}`);
+      if (p.conditions && p.conditions.length > 0) parts.push(`Known Conditions: ${p.conditions.join(', ')}`);
+      if (p.allergies) parts.push(`Allergies: ${p.allergies}`);
+      if (p.medications) parts.push(`Current Medications: ${p.medications}`);
+      return parts.length > 0 ? `\nPATIENT PROFILE CONTEXT: ${parts.join(' | ')}` : '';
+    } catch (e) {
+      return '';
+    }
+  },
+
   setApiKey(key) {
     localStorage.setItem('medisense_gemini_key', key.trim());
   },
@@ -52,12 +70,13 @@ GUIDELINES:
 
   async callGeminiAPI(apiKey) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const profileContext = this.getProfileContext();
 
     // Format conversation history for Gemini API
     const contents = [
       {
         role: 'user',
-        parts: [{ text: `SYSTEM INSTRUCTIONS: ${this.SYSTEM_INSTRUCTION}` }]
+        parts: [{ text: `SYSTEM INSTRUCTIONS: ${this.SYSTEM_INSTRUCTION}${profileContext}` }]
       },
       {
         role: 'model',
@@ -108,6 +127,8 @@ GUIDELINES:
   localTriageFallback(userMessage, hadApiError = false) {
     const fullConversation = this.history.map(m => m.text).join(' ').toLowerCase();
     const kb = (typeof MEDISENSE_KB !== 'undefined') ? MEDISENSE_KB : [];
+    const profile = window.Storage ? window.Storage.getProfile() : null;
+    const knownConditions = (profile && profile.conditions) ? profile.conditions.map(c => c.toLowerCase()) : [];
 
     // ── Emergency override: always escalate for these triggers ──
     const emergencyTriggers = [
@@ -132,6 +153,11 @@ GUIDELINES:
       condition.keywords.forEach(kw => {
         if (text.includes(kw.toLowerCase())) score += 3;
       });
+
+      // Boost score if condition matches patient's diagnosed chronic conditions
+      if (knownConditions.some(kc => condition.name.toLowerCase().includes(kc) || kc.includes(condition.name.toLowerCase()))) {
+        score += 2;
+      }
 
       // Symptom signals from conversation
       if (condition.symptoms.fever && (text.includes('fever') || text.includes('temperature') || text.includes('hot'))) score += 2;
