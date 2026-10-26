@@ -1279,17 +1279,17 @@
 
   <!-- Disease Detail Modal (Encyclopedia) -->
   <div id="modal-disease-detail" class="modal-backdrop">
-    <div class="modal-dialog" style="max-width: 680px;">
-      <div class="login-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+    <div class="modal-dialog disease-details-dialog" style="max-width: 680px;">
+      <div class="modal-sticky-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
           <span id="disease-modal-category" class="category-tag tag-general" style="margin-bottom: 4px; display: inline-block;">CATEGORY</span>
           <h2 id="disease-modal-title" style="font-size: 1.5rem; margin: 0.25rem 0;">Condition Name</h2>
           <div id="disease-modal-urgency" class="triage-outcome-tag tag-home" style="font-size: 0.8rem; margin: 0.25rem 0 0;">Urgency: Moderate</div>
         </div>
-        <button type="button" id="btn-close-disease-modal" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.85rem;">&times;</button>
+        <button type="button" id="btn-close-disease-modal" onclick="EncyclopediaPage.closeDetailModal()" class="btn btn-secondary modal-close-btn" title="Close" aria-label="Close">&times;</button>
       </div>
 
-      <div style="max-height: 60vh; overflow-y: auto; padding-right: 0.5rem;">
+      <div class="modal-scroll-body">
         <div style="margin-bottom: 1rem;">
           <h4 style="margin: 0 0 0.35rem; font-size: 0.95rem; font-weight: 800;">Recommended Clinical Action:</h4>
           <p id="disease-modal-advice" style="font-size: 0.95rem; line-height: 1.5; color: var(--text-main); margin: 0;">Advice text...</p>
@@ -1310,8 +1310,8 @@
         </div>
       </div>
 
-      <div class="form-actions" style="margin-top: 1.25rem; justify-content: flex-end;">
-        <button type="button" onclick="document.getElementById('modal-disease-detail').classList.remove('active')" class="btn btn-primary">Done Reading</button>
+      <div class="modal-sticky-footer" style="justify-content: flex-end;">
+        <button type="button" onclick="EncyclopediaPage.closeDetailModal()" class="btn btn-primary">Done Reading</button>
       </div>
     </div>
   </div>
@@ -1356,7 +1356,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="config.js"></script>
+  <script>window.MEDISENSE_CONFIG = window.MEDISENSE_CONFIG || { GEMINI_API_KEY: '' };</script>
+  <script src="config.js" onerror="this.remove()"></script>
   <script src="storage.js"></script>
   <script src="knowledge-base.js"></script>
   <script src="clinical-nlp.js"></script>

@@ -890,8 +890,9 @@ body {
   flex-direction: column;
 }
 
-/* Session Details Modal - sticky header/footer, scrollable body */
-.session-details-dialog {
+/* Session & Disease Details Modals - sticky header/footer, scrollable body */
+.session-details-dialog,
+.disease-details-dialog {
   padding: 0 !important;
   overflow: hidden !important;
 }

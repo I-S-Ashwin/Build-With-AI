@@ -302,7 +302,45 @@ const EncyclopediaPage = {
     const btnCloseModal = document.getElementById('btn-close-disease-modal');
     if (btnCloseModal) {
       btnCloseModal.addEventListener('click', () => {
-        document.getElementById('modal-disease-detail').classList.remove('active');
+        this.closeDetailModal();
+      });
+    }
+
+    // Backdrop click dismiss for disease modal
+    const detailModal = document.getElementById('modal-disease-detail');
+    if (detailModal) {
+      detailModal.addEventListener('click', (e) => {
+        if (e.target === detailModal) {
+          this.closeDetailModal();
+        }
+      });
+    }
+
+    // Delegated click listener on encyclopedia cards container
+    const container = document.getElementById('encyc-grid-container');
+    if (container) {
+      container.addEventListener('click', (e) => {
+        const inspectBtn = e.target.closest('.btn-inspect-disease');
+        if (inspectBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const dName = inspectBtn.getAttribute('data-disease');
+          if (dName) {
+            this.openDetailModal(dName);
+          }
+          return;
+        }
+
+        const bmBtn = e.target.closest('.encyc-card-bookmark-btn');
+        if (bmBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const dName = bmBtn.getAttribute('data-disease');
+          if (dName) {
+            this.toggleBookmark(dName);
+          }
+          return;
+        }
       });
     }
   },
@@ -369,9 +407,10 @@ const EncyclopediaPage = {
       const dyspneaChip = s.breathingDifficulty ? '<span class="sym-badge sym-breathing">Breathing Difficulty ⚠️</span>' : '';
 
       const isBookmarked = bookmarks.includes(item.name);
+      const encodedName = encodeURIComponent(item.name);
       return `
-        <article class="encyc-card" data-disease-name="${escapeHtml(item.name)}">
-          <button type="button" class="encyc-card-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" onclick="event.stopPropagation(); EncyclopediaPage.toggleBookmark('${escapeHtml(item.name).replace(/'/g, "\\'")}')" title="${isBookmarked ? 'Remove from Saved' : 'Save Condition Bookmark'}">
+        <article class="encyc-card" data-disease-name="${escapeHtml(item.name)}" data-disease="${encodedName}">
+          <button type="button" class="encyc-card-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" data-disease="${encodedName}" title="${isBookmarked ? 'Remove from Saved' : 'Save Condition Bookmark'}">
             ${isBookmarked ? '⭐' : '☆'}
           </button>
           <div class="encyc-card-top">
@@ -392,7 +431,7 @@ const EncyclopediaPage = {
           </p>
 
           <div class="encyc-card-footer">
-            <button type="button" class="btn btn-secondary btn-inspect-disease" onclick="EncyclopediaPage.openDetailModal('${escapeHtml(item.name).replace(/'/g, "\\'")}')">
+            <button type="button" class="btn btn-secondary btn-inspect-disease" data-disease="${encodedName}">
               Inspect Protocol &rarr;
             </button>
           </div>
@@ -402,11 +441,13 @@ const EncyclopediaPage = {
   },
 
   toggleBookmark(diseaseName) {
+    if (!diseaseName) return;
+    const rawName = decodeURIComponent(diseaseName);
     let bms = (typeof getBookmarks === 'function') ? getBookmarks() : [];
-    if (bms.includes(diseaseName)) {
-      bms = bms.filter(n => n !== diseaseName);
+    if (bms.includes(rawName)) {
+      bms = bms.filter(n => n !== rawName);
     } else {
-      bms.push(diseaseName);
+      bms.push(rawName);
     }
     if (typeof saveBookmarks === 'function') saveBookmarks(bms);
     this.renderCards();
@@ -424,9 +465,17 @@ const EncyclopediaPage = {
   },
 
   openDetailModal(diseaseName) {
+    if (!diseaseName) return;
+    const rawName = decodeURIComponent(diseaseName).trim().toLowerCase();
     const kb = (typeof MEDISENSE_KB !== 'undefined') ? MEDISENSE_KB : [];
-    const item = kb.find(d => d.name.toLowerCase() === diseaseName.toLowerCase());
-    if (!item) return;
+    const item = kb.find(d => 
+      d.name.toLowerCase() === rawName || 
+      d.name.toLowerCase() === diseaseName.trim().toLowerCase()
+    );
+    if (!item) {
+      console.warn('Condition not found in KB:', diseaseName, rawName);
+      return;
+    }
 
     const modal = document.getElementById('modal-disease-detail');
     const title = document.getElementById('disease-modal-title');
@@ -462,7 +511,18 @@ const EncyclopediaPage = {
       }
     }
 
-    if (modal) modal.classList.add('active');
+    if (modal) {
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+    }
+  },
+
+  closeDetailModal() {
+    const modal = document.getElementById('modal-disease-detail');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+    }
   }
 };
 
